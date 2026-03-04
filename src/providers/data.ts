@@ -2,8 +2,10 @@ import { DataProvider } from "@refinedev/core"; // Importante: tipo en SINGULAR
 import * as restModule from "@refinedev/rest";
 import { axiosInstance } from "../api/axiosInstance";
 
-// Función para extraer la función constructora real del módulo
-const getRestProvider = () => {
+/* Helper para extraer ña función constructura del módulo de refine.
+   esto resuelve el problema de empaquetado de Vite 
+*/
+const getRestProviderFunction = () => {
     // Caso 1: Es la exportación por defecto (más común en Vite)
     if (typeof (restModule as any).default === "function") {
         //console.log("Caso #1");
@@ -31,8 +33,9 @@ const getRestProvider = () => {
     throw new Error("No se pudo encontrar la función constructora en @refinedev/rest");
 };
 
-const restProviderFunc = getRestProvider();
+const restProviderFunc = getRestProviderFunction();
 
+// Inicializamos el dataProvider con la función constructora obtenida, pasando la URL base y la instancia de Axios
 const baseDataProvider = restProviderFunc(
   axiosInstance.defaults.baseURL as string,
   axiosInstance
@@ -48,15 +51,19 @@ export const dataProvider: DataProvider = {
     getList: async ( {resource, pagination, filters, sorters, meta}) => {
       const { currentPage: current = 1, pageSize = 10 } = pagination ?? {};
 
-      // Mapeo de parametros para springboot (page es 0-based)
-      const query: any = {
-        page: current - 1, // Ajuste para que el backend reciba un índice basado en cero
-        size: pageSize,
-      };
-      
-      const url = meta?.endpoint ? `${resource}/${meta.endpoint}` : `${resource}/list`;
+      // APLICANDO CLEAN ARCHITECTURE: Convención sobre configuración
+      // 1. Prioriza el endpoint definido en el componente (vía meta).
+      // 2. Si no existe, usa la convención estándar 'list'.
+      const endpoint = meta?.endpoint ?? "list";
+      const url = `${resource}/${endpoint}`;
 
-      const { data } = await axiosInstance.get(`${url}`, { params: query });
+      const { data } = await axiosInstance.get(url,{
+        params: {
+          page: current - 1, // Ajuste para que el backend reciba un índice basado en cero
+          size: pageSize,
+          // Aquí podrías agregar lógica para convertir 'filters' y 'sorters' en parámetros de consulta si tu backend los soporta
+        },
+      });
 
       //console.log(data);
       return {
@@ -65,8 +72,13 @@ export const dataProvider: DataProvider = {
       };
 
     },
-    getOne: async({resource, id}) => {
-      const { data } = await axiosInstance.get(`${resource}/detail/${id}`);
+    getOne: async({resource, id, meta}) => {
+
+      const endpoint = meta?.endpoint ?? "detail";
+      const url = `${resource}/${endpoint}/${id}`;
+
+      const { data } = await axiosInstance.get(url);
+
       return data;
     },
   };

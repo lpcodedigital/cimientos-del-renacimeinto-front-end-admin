@@ -15,7 +15,10 @@ export const ObraList = () => {
         resource: "obra", // El nombre del recurso que quieres consultar. Refine usará esto para construir la URL de la API (e.g., /obra/list).
         pagination: {
             pageSize: 10, // Número de elementos por página
-        }
+        },
+        meta: {
+            endpoint: "list", // Si tu API tiene un endpoint específico para listar, puedes especificarlo aquí. De lo contrario, se usará el endpoint por defecto.
+        },
         
     });
     //console.log(dataGridProps.rows);
