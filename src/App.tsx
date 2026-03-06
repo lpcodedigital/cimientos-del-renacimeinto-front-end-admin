@@ -41,6 +41,7 @@ import { dataProvider } from "./providers/data";
 import { Typography } from "@mui/material";
 import { ObraList } from "./pages/obras/list";
 import { Title } from "./components/Title";
+import { ObraShow } from "./pages/obras/show";
 
 function App() {
   return (
@@ -81,8 +82,9 @@ function App() {
                   {
                     name: "obra",
                     list: "/obras",
+                    show: "/obras/show/:id",
                     meta: {
-                      label: "Mapa de Obras",
+                      label: "Obras",
                     },
                   },
                 ]}
@@ -131,6 +133,7 @@ function App() {
                     </Route> */}
                     <Route path="/obras">
                       <Route index element={<ObraList />} />
+                      <Route path="/obras/show/:id" element={<ObraShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>

@@ -65,7 +65,6 @@ export const dataProvider: DataProvider = {
         },
       });
 
-      //console.log(data);
       return {
         data: data.content, // Asumiendo que el backend devuelve un objeto con una propiedad 'content' que contiene la lista de obras
         total: data.totalElements, // Asumiendo que el backend devuelve un objeto con una propiedad 'totalElements' que indica el total de obras disponibles
@@ -76,9 +75,9 @@ export const dataProvider: DataProvider = {
 
       const endpoint = meta?.endpoint ?? "detail";
       const url = `${resource}/${endpoint}/${id}`;
-
+      
       const { data } = await axiosInstance.get(url);
 
-      return data;
+      return { data };
     },
   };
