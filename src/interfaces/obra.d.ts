@@ -1,3 +1,4 @@
+// Exportar interface ObraResponseListDTO
 export interface ObraResponseListDTO {
     content:          Content[];
     pageable:         Pageable;
@@ -35,4 +36,31 @@ export interface Sort {
     sorted:   boolean;
     unsorted: boolean;
     empty:    boolean;
+}
+
+// export interface ObraResponseDTO 
+
+export interface ObraResponseDTO {
+    id:           number;
+    name:         string;
+    municipality: string;
+    agency:       string;
+    investment:   number;
+    progress:     number;
+    description:  string;
+    latitude:     number;
+    longitude:    number;
+    status:       string;
+    images:       Image[];
+    createdAt:    Date;
+    createdBy:    string;
+}
+
+export interface Image {
+    id:       number;
+    url:      string;
+    thumbUrl: string;
+    mimeType: string;
+    size:     string;
+    position: number;
 }

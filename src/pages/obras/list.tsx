@@ -21,7 +21,6 @@ export const ObraList = () => {
         },
         
     });
-    //console.log(dataGridProps.rows);
 
     const columns =React.useMemo<GridColDef<Content>[]>(
         () => [
