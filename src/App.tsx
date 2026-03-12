@@ -42,6 +42,7 @@ import { Typography } from "@mui/material";
 import { ObraList } from "./pages/obras/list";
 import { Title } from "./components/Title";
 import { ObraShow } from "./pages/obras/show";
+import { ObraCreate } from "./pages/obras/create";
 
 function App() {
   return (
@@ -83,6 +84,7 @@ function App() {
                     name: "obra",
                     list: "/obras",
                     show: "/obras/show/:id",
+                    create: "/obras/create",
                     meta: {
                       label: "Obras",
                     },
@@ -134,6 +136,7 @@ function App() {
                     <Route path="/obras">
                       <Route index element={<ObraList />} />
                       <Route path="/obras/show/:id" element={<ObraShow />} />
+                      <Route path="create" element={<ObraCreate />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>

@@ -11,6 +11,12 @@ axiosInstance.interceptors.request.use(
         const token = localStorage.getItem(TOKEN_KEY);
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
+
+            // Logica Sólida: Si el cuerpo de la solicitud es FormData, entonces no se debe agregar el encabezado Content-Type
+            // para que el navegador lo gestione con el boundary correcto.
+            if (config.data instanceof FormData){
+                delete config.headers['Content-Type'];
+            }
         }
             return config;
 

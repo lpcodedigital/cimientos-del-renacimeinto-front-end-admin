@@ -64,3 +64,20 @@ export interface Image {
     size:     string;
     position: number;
 }
+
+
+// export interface ObraRequestDTO 
+
+export interface ObraRequestDTO {
+    name:         string;
+    municipality: string;
+    agency:       string;
+    investment:   number;
+    progress:     number;
+    description?:  string;
+    latitude:     number;
+    longitude:    number;
+    status:       string;
+    keepImageIds?: number[];
+    files?:       any[];
+}
