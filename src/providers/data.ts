@@ -80,4 +80,71 @@ export const dataProvider: DataProvider = {
 
       return { data };
     },
+
+    create: async({ resource, variables, meta}) =>{
+      const endpoint = meta?.endpoint ?? "create";
+
+      const url = `${resource}/${endpoint}`;
+
+      // Tipamos 'variables' explicitamente para acceder a las propiedades que necesitamos, como 'files'.
+      const typedVariables = variables as { files?: any[]; };
+
+      // Verificamos si el recurso es 'obra'
+      if (resource === "obra") {
+        
+        // Verificamos si al peticion tiene archivos adjuntos (e.g., imágenes)
+       // if (typedVariables.files && Array.isArray(typedVariables.files)) {
+  
+          const formData = new FormData();
+
+          // Extraemos las propiedades de typedVariables
+          const { files, ...restVaribles } = typedVariables;
+  
+          // 1. Crear el Blob.
+          // Creamos un Blob con el contenido del DTO y especificamos que es JSON.
+          // Esto permite que @RequestPart en Spring Boot lo reconozca.
+          
+          const jsonBlob = new Blob([JSON.stringify(restVaribles)], { 
+            type: "application/json"
+          });
+  
+          //formData.append("data", jsonBlob);
+          formData.append("request", jsonBlob);
+          
+          // 2. Adjuntar archivos.
+
+          // Validamos si se adjuntaron archivos, si es asi, los adjuntamos y si no se envía un array vacio
+          if (files && files.length > 0) {
+          
+            // Iteramos las images seleccionadas en el front.
+            files.forEach((file:any) => {
+              // En la libreria de Refine/MUI, el archivo viene con la propiedad 'originFileObj'.
+              formData.append("files", file.originFileObj || file);
+              
+            });
+          } else {
+            formData.append("files", new Blob([], {type: "application/octet-stream"}), "empty");
+          }
+  
+          const { data } =await axiosInstance.post(url, formData, {
+            //headers: {
+            //  //"Content-Type": "multipart/form-data",
+            //  "Content-Type": "undefined",
+            // 
+            //},
+            // Evita que axios intente serializar el formData
+             transformRequest: [ (data) => data ],
+          });
+  
+           return { data };
+       // }
+
+      }
+
+
+      // Si no es 'obra', simplemente enviamos la solicitud normalmente con JSON.
+      // Si no hay archivos, enviamos la solicitud normalmente con JSON.
+      const { data } = await axiosInstance.post(url, variables);
+      return { data };
+    },
   };
