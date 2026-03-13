@@ -2,15 +2,17 @@ import { useForm } from "@refinedev/react-hook-form";
 import { ObraRequestDTO } from "../../interfaces/obra";
 import { Create } from "@refinedev/mui";
 import { Backdrop, Box, Button, CircularProgress, Grid2, MenuItem, Stack, TextField, Typography } from "@mui/material";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { OBRA_STATUS_CONFIG } from "../../constants/status-config";
 import { ImagePreviewGrid } from "../../components/obras/ImagePreviewGrid";
+import { MapPicker } from "../../components/obras/MapPicker";
 
 export const ObraCreate = () => {
 
     const {
         saveButtonProps,
         register,
+        setValue,
         control,
         formState: { errors },
         refineCore: { formLoading }
@@ -24,6 +26,10 @@ export const ObraCreate = () => {
             //},
         }
     });
+
+    // Escuchamos los valores de lat/lng para pasarselos al mapa
+    const lat = useWatch({ control, name: "latitude" });
+    const lng = useWatch({ control, name: "longitude" });
 
     return (
         <>  
@@ -148,6 +154,25 @@ export const ObraCreate = () => {
                                 label="Longitud"
                                 type="number"
                                 fullWidth
+                            />
+                        </Grid2>
+
+                        <Grid2
+                            size={{
+                                xs: 12,
+                            }}
+                        >
+                            <Typography>
+                                Ubicación geográfica de la obra
+                            </Typography>
+                            <MapPicker
+                                lat={lat}
+                                lng={lng}
+                                onChange={ (newLat,newLng) =>{
+                                    // Actualizamos los campos del fomrmulario automáticamente
+                                    setValue("latitude", newLat, { shouldValidate: true})
+                                    setValue("longitude", newLng, { shouldValidate: true})
+                                }}
                             />
                         </Grid2>
 
