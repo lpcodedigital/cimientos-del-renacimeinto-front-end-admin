@@ -2,9 +2,10 @@ import { useShow } from "@refinedev/core";
 import React from "react";
 import { ObraResponseDTO } from "../../interfaces/obra";
 import { DateField, NumberField, Show } from "@refinedev/mui";
-import { Box, Card, CardContent, Grid, Grid2, LinearProgress, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Grid, Grid2, LinearProgress, Skeleton, Stack, Typography } from "@mui/material";
 import { StatusTag } from "../../components/obras/StatusTag";
 import { ObraImageGallery } from "../../components/obras/ObraImageGallery";
+import { MapPicker } from "../../components/obras/MapPicker";
 
 export const ObraShow: React.FC = () => {
 
@@ -78,6 +79,26 @@ export const ObraShow: React.FC = () => {
                                 {record?.description || "No hay descripción disponible para esta obra."}
                             </Typography>
                         </Box>
+
+                        <Grid2
+                            size={{
+                                xs: 12,
+                            }}
+                        >
+                            <Typography>
+                                Ubicación geográfica de la obra
+                            </Typography>
+
+                            {/* Esta validación es para que no se muestre el mapa hasta que la obra tenga coordenadas */}
+                            { record ? (
+                                    <MapPicker
+                                        lat={record?.latitude}
+                                        lng={record?.longitude}
+                                    />
+                            ) : (
+                                <Skeleton variant="rectangular" height={400} />
+                            )}
+                        </Grid2>
                     </Stack>
                 </Grid2>
 
