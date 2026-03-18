@@ -80,7 +80,6 @@ export const dataProvider: DataProvider = {
 
       return { data };
     },
-
     create: async({ resource, variables, meta}) =>{
       const endpoint = meta?.endpoint ?? "create";
 
@@ -147,7 +146,6 @@ export const dataProvider: DataProvider = {
       const { data } = await axiosInstance.post(url, variables);
       return { data };
     },
-
     update: async ({ resource, id, variables, meta }) => {
 
       const  endpoint = meta?.endpoint ?? "update";
@@ -198,5 +196,16 @@ export const dataProvider: DataProvider = {
       const { data } = await axiosInstance.put(URL, variables);
       return { data };
 
+    },
+    deleteOne: async({ resource, id, variables, meta }) => {
+      const endpoint = meta?.endpoint ?? "delete";
+      const url = `${resource}/${endpoint}/${id}`;
+
+      const { data } = await axiosInstance.delete(url, {
+        data: variables,
+
+      });
+
+      return { data };
     },
   };
