@@ -131,8 +131,8 @@ export const ObraCreate = () => {
                                                     bgcolor: `${value.color}.main`,
                                                 }}
                                             >
-                                            {value.label}   
                                             </Box>
+                                            {value.label}   
                                         </Box>
                                     </MenuItem>
                                 ))}

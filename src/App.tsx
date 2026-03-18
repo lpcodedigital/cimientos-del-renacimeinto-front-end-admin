@@ -43,6 +43,7 @@ import { ObraList } from "./pages/obras/list";
 import { Title } from "./components/Title";
 import { ObraShow } from "./pages/obras/show";
 import { ObraCreate } from "./pages/obras/create";
+import { ObraEdit } from "./pages/obras/edit";
 
 function App() {
   return (
@@ -85,6 +86,7 @@ function App() {
                     list: "/obras",
                     show: "/obras/show/:id",
                     create: "/obras/create",
+                    edit: "/obras/edit/:id",
                     meta: {
                       label: "Obras",
                     },
@@ -137,6 +139,7 @@ function App() {
                       <Route index element={<ObraList />} />
                       <Route path="/obras/show/:id" element={<ObraShow />} />
                       <Route path="create" element={<ObraCreate />} />
+                      <Route path="edit/:id" element={<ObraEdit />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
