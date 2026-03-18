@@ -147,4 +147,56 @@ export const dataProvider: DataProvider = {
       const { data } = await axiosInstance.post(url, variables);
       return { data };
     },
+
+    update: async ({ resource, id, variables, meta }) => {
+
+      const  endpoint = meta?.endpoint ?? "update";
+      const URL = `${resource}/${endpoint}/${id}`;
+      console.log(URL);
+
+      const typeVariables = variables as { files?: any[]; };
+
+      if ( resource === "obra") {
+
+        const formData = new FormData();
+
+        // Separamos "files" del resto de campos del DTO (name, keepImageIds, etc.)
+        const { files, ...restVaribles } = typeVariables;
+
+      // 1. Crear el DTO como Blob JSON.
+        // Creamos un Blob con el contenido del DTO y especificamos que es JSON.
+        // Esto permite que @RequestPart en Spring Boot lo reconozca.
+        const jsonBlob = new Blob([JSON.stringify(restVaribles)], {
+          type: "application/json",
+        });
+
+        formData.append("request", jsonBlob);
+
+        // 2. Adjuntar archivos. (Si existen)
+        if (files && files.length > 0) {
+          files.forEach((file: any) =>{
+
+            // Solo adjuntar si es un archivo nuevo (tiene originFileObj)
+            if (file.originFileObj) {
+              formData.append("files", file.originFileObj || file);
+            }
+          });
+        }else {
+
+          // Si no se adjuntaron archivos, enviamos un array vacio para evitar errores
+          formData.append("files", new Blob([], {type: "application/octet-stream"}), "empty");
+        }
+
+        const { data } = await axiosInstance.put(URL, formData, {
+          transformRequest: [ (data) => data ],
+        });
+
+        return { data };
+
+      }
+
+      const { data } = await axiosInstance.put(URL, variables);
+      return { data };
+
+    },
   };
