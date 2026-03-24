@@ -166,7 +166,7 @@ export const ObraEdit: React.FC = () => {
                                                     width: 10,
                                                     height: 10,
                                                     borderRadius: "50%",
-                                                    bgcolor: `${value.color}.main`,
+                                                    bgcolor: `${value.chipColor}.main`,
                                                     flexShrink: 0, // Evita que el círculo se aplaste si el texto es largo
                                                 }}
                                             >

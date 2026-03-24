@@ -128,7 +128,7 @@ export const ObraCreate = () => {
                                                     width: 10,
                                                     height: 10,
                                                     borderRadius: "50%",
-                                                    bgcolor: `${value.color}.main`,
+                                                    bgcolor: `${value.chipColor}.main`,
                                                 }}
                                             >
                                             </Box>

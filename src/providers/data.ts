@@ -71,6 +71,7 @@ export const dataProvider: DataProvider = {
       };
 
     },
+
     getOne: async({resource, id, meta}) => {
 
       const endpoint = meta?.endpoint ?? "detail";
@@ -80,6 +81,7 @@ export const dataProvider: DataProvider = {
 
       return { data };
     },
+
     create: async({ resource, variables, meta}) =>{
       const endpoint = meta?.endpoint ?? "create";
 
@@ -146,6 +148,7 @@ export const dataProvider: DataProvider = {
       const { data } = await axiosInstance.post(url, variables);
       return { data };
     },
+
     update: async ({ resource, id, variables, meta }) => {
 
       const  endpoint = meta?.endpoint ?? "update";
@@ -197,6 +200,7 @@ export const dataProvider: DataProvider = {
       return { data };
 
     },
+
     deleteOne: async({ resource, id, variables, meta }) => {
       const endpoint = meta?.endpoint ?? "delete";
       const url = `${resource}/${endpoint}/${id}`;
@@ -207,5 +211,18 @@ export const dataProvider: DataProvider = {
       });
 
       return { data };
+    },
+
+    custom: async ({url, method, meta, payload}) => {
+      const requestUrl = meta?.endpoint ? `${url}/${meta.endpoint}` : url;
+      
+
+      const { data } = await axiosInstance({
+        url: requestUrl,
+        method: method as any,
+        data: payload,
+      });
+      
+      return { data }
     },
   };

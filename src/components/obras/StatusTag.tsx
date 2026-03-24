@@ -11,7 +11,7 @@ export const StatusTag: React.FC<StatusTagProps> = ({ status }) => {
     return (
         <TagField
             value={config.label}
-            color={config.color}
+            color={config.chipColor}
             sx={{ fontWeight: "bold", textTransform: "uppercase" }}
         />
     );
