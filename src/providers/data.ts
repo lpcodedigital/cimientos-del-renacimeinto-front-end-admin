@@ -48,7 +48,7 @@ export const dataProvider: DataProvider = {
   //axiosInstance
 
     ...baseDataProvider,
-    getList: async ( {resource, pagination, filters, sorters, meta}) => {
+    getList: async ( {resource, pagination, meta}) => {
       const { currentPage: current = 1, pageSize = 10 } = pagination ?? {};
 
       // APLICANDO CLEAN ARCHITECTURE: Convención sobre configuración

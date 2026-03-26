@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  cr-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: admin-cimientos-sib-dev
+    ports:
+      - "5174:5173" # Puerto host 5174 -> Contenedor 5173
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8081/api/v1
+    restart: no
+    networks:
+      - my_network_cr
