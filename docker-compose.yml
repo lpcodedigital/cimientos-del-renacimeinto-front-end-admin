@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  cr-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        # Aquí pasas la URL de tu backend dockerizado
+        VITE_API_URL: http://localhost:8081/api/v1 
+    container_name: admin-cimientos-sib-container
+    ports:
+      - "3001:80" # Usamos el 3001 para que no choque con el 3000 del público
+    restart: no
+    networks:
+      - my_network_cr
+
+networks:
+  my_network_cr:
+    external: true

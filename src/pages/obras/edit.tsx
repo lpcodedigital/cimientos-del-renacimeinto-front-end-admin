@@ -329,7 +329,7 @@ export const ObraEdit: React.FC = () => {
                                 rules={{
                                     validate: () => totalImages <= 10 || "El total de imágenes no puede ser mayor a 10"
                                 }}
-                                render={({ field, fieldState: { error} }) => (
+                                render={({ field }) => (
                                     <Box>
                                         <Button
                                             variant="outlined"
