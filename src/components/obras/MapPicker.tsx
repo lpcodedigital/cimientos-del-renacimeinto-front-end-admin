@@ -9,6 +9,11 @@ import icon from "leaflet/dist/images/marker-icon.png"
 import iconShadow from "leaflet/dist/images/marker-shadow.png"
 import { Box, Typography } from "@mui/material";
 
+import geoData from "../../assets/data/yucatan_municipios_2023.json";
+import { point, booleanPointInPolygon } from "@turf/turf";
+
+import { GeoJSON } from "react-leaflet";
+
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -24,10 +29,28 @@ interface MapPickerProos {
     lat?: number;
     lng?: number;
     onChange?: (lat: number, lng:number) => void;
+    onMunicipioDetectado?: (name: string) => void;
+    targetMunicipio?: string | null; 
 }
 
+// 🚀 NUEVO: Sub-componente para el buscador
+const FlyToMunicipio = ({ targetMunicipio }: { targetMunicipio: string | null }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (targetMunicipio) {
+            const feature = geoData.features.find(
+                (f: any) => f.properties.NOMGEO === targetMunicipio
+            );
+            if (feature) {
+                const geoJsonLayer = L.geoJson(feature as any);
+                map.flyToBounds(geoJsonLayer.getBounds(), { padding: [20, 20], duration: 1.5 });
+            }
+        }
+    }, [targetMunicipio, map]);
+    return null;
+};
 // Sub-Componente para manejar los eventos del mapa
-export const MapEvents = ({ onChange, position }: { onChange: any, position: [number, number]}) =>{
+export const MapEvents = ({ onChange, position, onMunicipioDetectado, isSearching }: { onChange: any, position: [number, number], onMunicipioDetectado?: (name: string) => void, isSearching?: boolean }) =>{
 
     // useMap es el hook para centrar la vista
     const map = useMap();
@@ -36,6 +59,20 @@ export const MapEvents = ({ onChange, position }: { onChange: any, position: [nu
     useMapEvents({
         click(e) {
             onChange(e.latlng.lat, e.latlng.lng);
+
+            // 🎯 Lógica de Geofencing con Turf
+            // ✅ USO CORRECTO SIN EL PREFIJO "turf."
+            const pt = point([e.latlng.lng, e.latlng.lat]); // Turf usa [longitud, latitud]
+            
+            const foundMunicipio = geoData.features.find((feature: any) => {
+                // ✅ Llamada directa a la función
+                return booleanPointInPolygon(pt, feature);
+            });
+
+            if (foundMunicipio && onMunicipioDetectado) {
+                const nombre = foundMunicipio.properties.NOMGEO;
+                onMunicipioDetectado(nombre);
+            }
         }
     });
 
@@ -43,17 +80,40 @@ export const MapEvents = ({ onChange, position }: { onChange: any, position: [nu
     // Efecto para centrar el mapa si las coordenadas cambian externamente
     useEffect( () => {
 
-        // Validamos que no sea la posicion por defecto si queremos que salte a la obra
-        if (position){
+        // Solo centramos en el marcador si NO estamos buscando un municipio
+        if (position && !isSearching) {
             map.flyTo(position, map.getZoom());
         }
-    }, [position, map]);
+    }, [position, map, isSearching]);
 
     return null;
 
 }
 
-export const MapPicker: React.FC<MapPickerProos> = ({ lat, lng, onChange }: MapPickerProos) => {
+// Componente para resaltar el municipio seleccionado (como en tu público)
+const MunicipioResaltado = ({ targetMunicipio }: { targetMunicipio: string | null }) => {
+    if (!targetMunicipio) return null;
+
+    const feature = geoData.features.find(
+        (f: any) => f.properties.NOMGEO === targetMunicipio
+    );
+
+    if (!feature) return null;
+
+    return (
+        <GeoJSON 
+            key={targetMunicipio}
+            data={feature as any} 
+            style={{
+                fillColor: "#e1f508", // Tu color guinda institucional
+                fillOpacity: 0.3,
+                color: "#901b45",
+                weight: 2
+            }}
+        />
+    );
+};
+export const MapPicker: React.FC<MapPickerProos> = ({ lat, lng, onChange, onMunicipioDetectado, targetMunicipio }: MapPickerProos) => {
     // Coordenadas iniciales de Merida (Plaza Grande) si no hay valores externos
 
     const defaultPosition: [number, number] = [20.9676, -89.6237];
@@ -89,22 +149,19 @@ export const MapPicker: React.FC<MapPickerProos> = ({ lat, lng, onChange }: MapP
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {/* Si hay coordenadas externas, se muestran en el mapa */}
-                {/* 
-                    {lat && lng && ( <Marker position={currentPosition}/>)}
-                */}
+                {/* Componente buscador dentro del contenedor */}
+                <FlyToMunicipio targetMunicipio={targetMunicipio ?? null} />
+
+                {/* Capa de resaltado (La idea de tu público) */}
+                <MunicipioResaltado targetMunicipio={targetMunicipio ?? null} />
+
                 { hasCoords && ( <Marker position={currentPosition}/>) }
 
-                {/*
-                    <MapEvents onChange={onChange} position={currentPosition} />
-                */}
-                {/* Solo activamos los eventos si existe la funcion onChange */}
-                {/*
-                    { onChange && <MapEvents onChange={onChange} position={currentPosition} /> }
-                 */}
                  <MapEvents 
                     onChange={onChange} 
                     position={currentPosition} 
+                    onMunicipioDetectado={onMunicipioDetectado}
+                    isSearching={!!targetMunicipio} // Si hay algo en el buscador, isSearching es true
                 />
 
             </MapContainer>
