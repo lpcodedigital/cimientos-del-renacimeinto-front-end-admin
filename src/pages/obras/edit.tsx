@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { ObraRequestDTO, ObraResponseDTO } from "../../interfaces/obra";
 import { useForm } from "@refinedev/react-hook-form";
 import { Edit } from "@refinedev/mui";
-import { Backdrop, Box, Button, CircularProgress, Grid2, IconButton, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Backdrop, Box, Button, CircularProgress, Grid2, IconButton, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { OBRA_STATUS_CONFIG } from "../../constants/status-config";
 import { MapPicker } from "../../components/obras/MapPicker";
 import { Controller, useWatch } from "react-hook-form";
 import { ImagePreviewGrid } from "../../components/obras/ImagePreviewGrid";
 import DeleteIcon from "@mui/icons-material/Delete";
+import geoData from "../../assets/data/yucatan_municipios_2023.json";
 
 export const ObraEdit: React.FC = () => {
 
@@ -32,6 +33,9 @@ export const ObraEdit: React.FC = () => {
     // Estado para almacenar las IDs de las imágenes que se deben mantener
     const [keepImageIds, setKeepImageIds] = useState<number[]>([]);
 
+    // Estado para el buscador del mapa 
+    const [municipioABuscar, setMunicipioABuscar] = useState<string | null>(null);
+
     // Sincronizar keepImageIds cuando cargan los datos por priemra vez.
     useEffect(() => {
         if (obraData) {
@@ -45,6 +49,8 @@ export const ObraEdit: React.FC = () => {
             setValue("status", obraData.status);
         }
     }, [obraData, setValue]);
+
+    const municipiosOptions = geoData.features.map(f => f.properties?.NOMGEO).sort();
 
     const lat = useWatch({ control, name: "latitude" });
     const lng = useWatch({ control, name: "longitude" });
@@ -121,11 +127,24 @@ export const ObraEdit: React.FC = () => {
                         </Grid2>
 
                         <Grid2 size={{ xs: 12, md: 6 }}>
-                            <TextField
-                                {...register("municipality", { required: "El municipio es obligatorio" })}
-                                error={!!errors.municipality}
-                                fullWidth
-                            />
+                            <Controller
+                                    control={control}
+                                    name="municipality"
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Municipio"
+                                            fullWidth
+                                            variant="filled"
+                                            slotProps={{
+                                                input: { readOnly: true },
+                                                inputLabel: { shrink: true }
+                                            }}
+                                            error={!!errors.municipality}
+                                            helperText={errors.municipality?.message || "Detectado por el mapa"}
+                                        />
+                                    )}
+                                />
                         </Grid2>
 
                         <Grid2 size={{ xs: 12, md: 4 }}>
@@ -179,19 +198,43 @@ export const ObraEdit: React.FC = () => {
                         </Grid2>
 
                         <Grid2 size={{ xs: 6 }}>
-                            <TextField
-                                {...register("latitude", { required: true, valueAsNumber: true })}
-                                type="number"
-                                fullWidth
-                            />
+                            <Controller
+                                        control={control}
+                                        name="latitude"
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Latitud"
+                                                fullWidth
+                                                variant="filled"
+                                                slotProps={{
+                                                    input: { readOnly: true },
+                                                    inputLabel: { shrink: true }
+                                                }}
+                                                helperText={errors.latitude ? (errors.latitude.message as string) : "Selecciona la ubicación en el mapa para detectar la latitud automáticamente."}
+                                            />
+                                        )}
+                                    />
                         </Grid2>
 
                         <Grid2 size={{ xs: 6 }}>
-                            <TextField
-                                {...register("longitude", { required: true, valueAsNumber: true })}
-                                type="number"
-                                fullWidth
-                            />
+                            <Controller
+                                        control={control}
+                                        name="longitude"
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Longitud"
+                                                fullWidth
+                                                variant="filled"
+                                                slotProps={{
+                                                    input: { readOnly: true },
+                                                    inputLabel: { shrink: true }
+                                                }}
+                                                helperText={errors.longitude ? (errors.longitude.message as string) : "Selecciona la ubicación en el mapa para detectar la longitud automáticamente."}
+                                            />
+                                        )}
+                                    />
                         </Grid2>
 
                         {/* Mapa reactivo */}
@@ -203,15 +246,45 @@ export const ObraEdit: React.FC = () => {
                             <Typography>
                                 Ubicación geográfica de la obra
                             </Typography>
-                            <MapPicker
-                                lat={lat}
-                                lng={lng}
-                                onChange={(newLat, newLng) => {
-                                    // Actualizamos los campos del fomrmulario automáticamente
-                                    setValue("latitude", newLat, { shouldValidate: true })
-                                    setValue("longitude", newLng, { shouldValidate: true })
-                                }}
-                            />
+
+                            <Stack spacing={2}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="subtitle2">📍 Ubicador de Municipio</Typography>
+                                    {municipioABuscar && (
+                                        <Button 
+                                            size="small" 
+                                            onClick={() => setMunicipioABuscar(null)}
+                                            sx={{ textTransform: 'none', color: '#901b45' }}
+                                        >
+                                            Limpiar búsqueda
+                                        </Button>
+                                    )}
+                                </Box>
+
+                                {/* 4. El buscador de apoyo */}
+                                <Autocomplete
+                                    options={municipiosOptions}
+                                    value={municipioABuscar}
+                                    onChange={(_, newValue) => setMunicipioABuscar(newValue)}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Buscar para acercar..." size="small" />
+                                    )}
+                                />
+                                <MapPicker
+                                    lat={lat}
+                                    lng={lng}
+                                    targetMunicipio={municipioABuscar}
+                                    onChange={(newLat, newLng) => {
+                                        // Actualizamos los campos del fomrmulario automáticamente
+                                        setValue("latitude", newLat, { shouldValidate: true })
+                                        setValue("longitude", newLng, { shouldValidate: true })
+                                    }}
+                                    onMunicipioDetectado={(name) => {
+                                        setValue("municipality", name, { shouldValidate: true });
+                                    }}
+                                />
+                            </Stack>
+
                         </Grid2>
 
                         <Grid2
