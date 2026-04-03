@@ -71,14 +71,6 @@ export const UserList: React.FC = () => {
                 ),
             },
             {
-                field: "createdAt",
-                headerName: "Fecha de Registro",
-                width: 180,
-                renderCell: ({ value }) => (
-                    <DateField value={value} format="DD/MM/YYYY HH:mm" />
-                ),
-            },
-            {
                 field: "actions",
                 headerName: "Acciones",
                 sortable: false,
