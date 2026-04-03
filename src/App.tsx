@@ -36,6 +36,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import { UserList } from "./pages/users/list";
 import PeopleIcon from "@mui/icons-material/People";
+import { UserShow } from "./pages/users/show";
 
 function App() {
   return (
@@ -79,6 +80,7 @@ function App() {
                   {
                     name: "user",
                     list: "/users",
+                    show: "/users/show/:id",
                     meta: {
                       label: "Usuarios",
                       icon: <PeopleIcon/>,
@@ -124,6 +126,7 @@ function App() {
 
                     <Route path="/users">
                       <Route index element={<UserList />} />
+                      <Route path="show/:id" element={<UserShow />} />
                     </Route>
 
                     <Route path="*" element={<ErrorComponent />} />

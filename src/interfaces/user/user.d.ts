@@ -16,7 +16,8 @@ export interface UserDTO {
     isFirstLogin: boolean;
     twoFactorEnabled: boolean;
     role: RoleDTO;
-    crearedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface UserRequestDTO {
