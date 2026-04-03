@@ -66,8 +66,8 @@ export const dataProvider: DataProvider = {
       });
 
       return {
-        data: data.content, // Asumiendo que el backend devuelve un objeto con una propiedad 'content' que contiene la lista de obras
-        total: data.totalElements, // Asumiendo que el backend devuelve un objeto con una propiedad 'totalElements' que indica el total de obras disponibles
+        data: data.users || data.content || [], // Asumiendo que el backend devuelve un objeto con una propiedad 'content' que contiene la lista de obras
+        total: data.totalItems || data.totalElements || 0, // Asumiendo que el backend devuelve un objeto con una propiedad 'totalElements' que indica el total de obras disponibles
       };
 
     },

@@ -34,6 +34,8 @@ import { ObraEdit } from "./pages/obras/edit";
 import { DashboardPage } from "./pages/dashboard";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import { UserList } from "./pages/users/list";
+import PeopleIcon from "@mui/icons-material/People";
 
 function App() {
   return (
@@ -56,7 +58,7 @@ function App() {
                     list: "/", // Ruta raíz
                     meta: {
                       label: "Dashboard",
-                      icon: <DashboardIcon />, 
+                      icon: <DashboardIcon />,
                       //hide: false,
                       //dashboard: true,
                       hide: true, // <--- Esto oculta el recurso del menú
@@ -70,8 +72,16 @@ function App() {
                     edit: "/obras/edit/:id",
                     meta: {
                       label: "Obras",
-                      icon: <AccountTreeIcon />, 
+                      icon: <AccountTreeIcon />,
                       //canDelete: true
+                    },
+                  },
+                  {
+                    name: "user",
+                    list: "/users",
+                    meta: {
+                      label: "Usuarios",
+                      icon: <PeopleIcon/>,
                     },
                   },
                 ]}
@@ -111,8 +121,15 @@ function App() {
                       <Route path="create" element={<ObraCreate />} />
                       <Route path="edit/:id" element={<ObraEdit />} />
                     </Route>
+
+                    <Route path="/users">
+                      <Route index element={<UserList />} />
+                    </Route>
+
                     <Route path="*" element={<ErrorComponent />} />
+
                   </Route>
+
 
                   {/* Rutas Públicas */}
                   <Route
