@@ -18,7 +18,7 @@ export const ObraEdit: React.FC = () => {
         control, // Controlador para manejar el estado del formulario
         formState: { errors }, // Estado de errores del formulario
         setValue, // Función para establecer valores en el formulario
-        refineCore: { query: queryResult, formLoading }, // Resultado de la consulta y estado de carga
+        refineCore: { query: queryResult, formLoading,  }, // Resultado de la consulta y estado de carga
     } = useForm<ObraResponseDTO, any, ObraRequestDTO>({
         refineCoreProps: {
             resource: "obra",
@@ -70,6 +70,12 @@ export const ObraEdit: React.FC = () => {
     const totalImages = keepImageIds.length + (files?.length || 0);
     const isOverLimit = totalImages > 10;
 
+    //Determinamos mensaje dinamico
+    const loadingMessage = queryResult?.isLoading
+        ? "Cargando datos de la obra..." 
+        : "Actualizando información de la obra...";
+
+
     return (
         <>
             {/* Este overlay se muestra mientras se guarda el formulario */}
@@ -79,7 +85,7 @@ export const ObraEdit: React.FC = () => {
                     zIndex: (theme) => theme.zIndex.drawer + 1,
                     flexDirection: "column",
                 }}
-                open={formLoading}
+                open={queryResult?.isLoading || formLoading}
             >
                 <CircularProgress color="inherit" />
                 <Stack
@@ -89,7 +95,7 @@ export const ObraEdit: React.FC = () => {
                     alignItems="center"
                 >
                     <Typography variant="h6">
-                        Guardando obra y evidencias...
+                        {loadingMessage}
                     </Typography>
                     <Typography variant="caption">
                         Esto puede tardar unos segundos dependiendo del tamaño de las imágenes.

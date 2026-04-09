@@ -26,4 +26,5 @@ export interface UserRequestDTO {
     password: string;
     active: boolean;
     roleId: number;
+    twoFactorEnabled: boolean;
 }
