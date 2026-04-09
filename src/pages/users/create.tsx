@@ -49,14 +49,6 @@ export const UserCreate: React.FC = () => {
                         label="Nombre"
                         fullWidth
                     />
-                </Stack>
-
-                <Stack direction={{
-                        xs: "column",
-                        md: "row",
-                    }}
-                    spacing={2}
-                >
                     <TextField
                         {...register("middleName",)}
                         label="Segundo Nombre (Opcional)"
@@ -77,14 +69,6 @@ export const UserCreate: React.FC = () => {
                         label="Apellido Paterno"
                         fullWidth
                     />
-                </Stack>
-
-                <Stack direction={{
-                        xs: "column",
-                        md: "row",
-                    }}
-                    spacing={2}
-                >
                     <TextField
                         {...register("secondLastName", {required: "El apellido materno es obligatorio" })}
                         error={!!errors.secondLastName}
@@ -116,11 +100,11 @@ export const UserCreate: React.FC = () => {
                     spacing={2}
                 >
                     <TextField
-                        {...register("password", {required: "La contraseña es obligatoria" })}
-                        error={!!errors.password}
-                        helperText={errors.password?.message as string}
-                        label="Contraseña Temporal"
-                        type="password"
+                        {...register("phone", {required: "El número de teléfono es obligatorio" })}
+                        error={!!errors.phone}
+                        helperText={errors.phone?.message as string}
+                        label="Número de Teléfono"
+                        type="tel"
                         fullWidth
                     />
                 </Stack>
@@ -132,11 +116,11 @@ export const UserCreate: React.FC = () => {
                     spacing={2}
                 >
                     <TextField
-                        {...register("phone", {required: "El número de teléfono es obligatorio" })}
-                        error={!!errors.phone}
-                        helperText={errors.phone?.message as string}
-                        label="Número de Teléfono"
-                        type="tel"
+                        {...register("password", {required: "La contraseña es obligatoria" })}
+                        error={!!errors.password}
+                        helperText={errors.password?.message as string}
+                        label="Contraseña Temporal"
+                        type="password"
                         fullWidth
                     />
                 </Stack>

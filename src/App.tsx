@@ -38,6 +38,7 @@ import { UserList } from "./pages/users/list";
 import PeopleIcon from "@mui/icons-material/People";
 import { UserShow } from "./pages/users/show";
 import { UserCreate } from "./pages/users/create";
+import { UserEdit } from "./pages/users/edit";
 
 function App() {
   return (
@@ -83,6 +84,7 @@ function App() {
                     list: "/users",
                     show: "/users/show/:id",
                     create: "/users/create",
+                    edit: "/users/edit/:id",
                     meta: {
                       label: "Usuarios",
                       icon: <PeopleIcon/>,
@@ -136,6 +138,7 @@ function App() {
                       <Route index element={<UserList />} />
                       <Route path="show/:id" element={<UserShow />} />
                       <Route path="create" element={<UserCreate />} />
+                      <Route path="edit/:id" element={<UserEdit />} />
                     </Route>
 
                     <Route path="*" element={<ErrorComponent />} />
