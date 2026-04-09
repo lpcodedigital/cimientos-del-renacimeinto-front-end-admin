@@ -65,9 +65,13 @@ export const dataProvider: DataProvider = {
         },
       });
 
+      // 1. Si 'data' ya es un array (caso Roles), lo usamos directamente.
+      // 2. Si no, buscamos en las propiedades conocidas (caso Obras/Usuarios).
+      const isArray = Array.isArray(data);
+
       return {
-        data: data.users || data.content || [], // Asumiendo que el backend devuelve un objeto con una propiedad 'content' que contiene la lista de obras
-        total: data.totalItems || data.totalElements || 0, // Asumiendo que el backend devuelve un objeto con una propiedad 'totalElements' que indica el total de obras disponibles
+        data: isArray ? data : (data.users || data.content || []), // Asumiendo que el backend devuelve un objeto con una propiedad 'content' que contiene la lista de obras
+        total: isArray ? data.length : (data.totalItems || data.totalElements || 0), // Asumiendo que el backend devuelve un objeto con una propiedad 'totalElements' que indica el total de obras disponibles
       };
 
     },
