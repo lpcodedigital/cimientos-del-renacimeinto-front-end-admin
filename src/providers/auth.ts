@@ -69,7 +69,10 @@ export const authProvider: AuthProvider = {
   // Obtiene los permisos del usuario (en este caso, el rol) para controlar el acceso a ciertas partes de la aplicación
   getPermissions: async () => {
     const user = localStorage.getItem(USER_KEY);
-    return user ? JSON.parse(user).role : null;
+    return user ? JSON.parse(user).role : null; //// Retorna "ROLE_ADMIN", "ROLE_USER" o "ROLE_GUEST"
+    //if (!user) return null;
+    //const {role} = JSON.parse(user);
+    //return role;
   },
 
   // Obtiene la identidad del usuario de JWT

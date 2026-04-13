@@ -40,8 +40,10 @@ import { UserShow } from "./pages/users/show";
 import { UserCreate } from "./pages/users/create";
 import { UserEdit } from "./pages/users/edit";
 import { UpdatePassword } from "./pages/updatePassword/UpdatePassword";
+import { accessControlProvider } from "./providers/accessControl";
 
 function App() {
+
   return (
     <BrowserRouter>
       <GitHubBanner />
@@ -52,6 +54,7 @@ function App() {
           <RefineSnackbarProvider>
             <DevtoolsProvider>
               <Refine
+                accessControlProvider={accessControlProvider}
                 dataProvider={dataProvider}
                 authProvider={authProvider}
                 notificationProvider={useNotificationProvider}
@@ -152,17 +155,17 @@ function App() {
                       </Authenticated>
                     }
                   >
-                    <Route path="/login" 
+                    <Route path="/login"
                       element={
-                      <AuthPage
-                        type="login"
-                        title={
-                          <Typography variant="h5" fontWeight={700}>
-                            SIB ADMIN
-                          </Typography>
-                        }
-                      />
-                    } />
+                        <AuthPage
+                          type="login"
+                          title={
+                            <Typography variant="h5" fontWeight={700}>
+                              SIB ADMIN
+                            </Typography>
+                          }
+                        />
+                      } />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                   </Route>
