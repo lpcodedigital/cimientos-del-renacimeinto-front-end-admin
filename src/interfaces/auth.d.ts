@@ -10,4 +10,5 @@ export interface User {
     email:  string;
     active: boolean;
     role:   string;
+    isFirstLogin: boolean;
 }

@@ -39,6 +39,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import { UserShow } from "./pages/users/show";
 import { UserCreate } from "./pages/users/create";
 import { UserEdit } from "./pages/users/edit";
+import { UpdatePassword } from "./pages/updatePassword/UpdatePassword";
 
 function App() {
   return (
@@ -52,9 +53,9 @@ function App() {
             <DevtoolsProvider>
               <Refine
                 dataProvider={dataProvider}
+                authProvider={authProvider}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerProvider}
-                authProvider={authProvider}
                 resources={[
                   {
                     name: "inicio",
@@ -87,9 +88,10 @@ function App() {
                     edit: "/users/edit/:id",
                     meta: {
                       label: "Usuarios",
-                      icon: <PeopleIcon/>,
+                      icon: <PeopleIcon />,
                     },
                   },
+                  // Recurso "role" para cargar los roles en el catálogo de userCreate y userEdit
                   {
                     name: "role",
                     meta: {
@@ -111,58 +113,50 @@ function App() {
                         key="authenticated-inner"
                         fallback={<CatchAllNavigate to="/login" />}
                       >
-                        <ThemedLayout
-                          Header={Header}
-
-                          // Pasamos un componente de título que no contiene enlaces, para evitar el error de "<a> inside <a>"
-                          Title={Title}
-                        >
+                        <ThemedLayout Header={Header} Title={Title}>
                           <Outlet />
                         </ThemedLayout>
                       </Authenticated>
                     }
                   >
                     {/* 1. RUTA INICIAL: El index ahora renderiza DashboardPage directamente */}
-                    <Route
-                      index
-                      element={<DashboardPage />}
-                    />
+                    <Route index element={<DashboardPage />} />
                     <Route path="/obras">
                       <Route index element={<ObraList />} />
                       <Route path="/obras/show/:id" element={<ObraShow />} />
                       <Route path="create" element={<ObraCreate />} />
                       <Route path="edit/:id" element={<ObraEdit />} />
                     </Route>
-
                     <Route path="/users">
                       <Route index element={<UserList />} />
                       <Route path="show/:id" element={<UserShow />} />
                       <Route path="create" element={<UserCreate />} />
                       <Route path="edit/:id" element={<UserEdit />} />
                     </Route>
-
                     <Route path="*" element={<ErrorComponent />} />
-
                   </Route>
-
 
                   {/* Rutas Públicas */}
                   <Route
+                    path="/update-password"
                     element={
-                      <Authenticated
-                        key="authenticated-outer"
-                        fallback={<Outlet />}
-                      >
+                      <Authenticated key="update-password" fallback={<CatchAllNavigate to="/login" />}>
+                        <UpdatePassword />
+                      </Authenticated>
+                    }
+                  />
+                  <Route
+                    element={
+                      <Authenticated key="authenticated-outer" fallback={<Outlet />}>
                         <NavigateToResource />
                       </Authenticated>
                     }
                   >
-                    <Route path="/login" element={
+                    <Route path="/login" 
+                      element={
                       <AuthPage
                         type="login"
                         title={
-                          // Al definir el título como un simple string o un Box sin links,
-                          // evitas el error de "<a> inside <a>"
                           <Typography variant="h5" fontWeight={700}>
                             SIB ADMIN
                           </Typography>
@@ -170,10 +164,7 @@ function App() {
                       />
                     } />
                     <Route path="/register" element={<Register />} />
-                    <Route
-                      path="/forgot-password"
-                      element={<ForgotPassword />}
-                    />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
                   </Route>
                 </Routes>
 

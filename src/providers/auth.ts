@@ -13,6 +13,11 @@ export const authProvider: AuthProvider = {
       localStorage.setItem(TOKEN_KEY, data.token);
 
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+
+      if (data.user.isFirstLogin) {
+        return { success: true, redirectTo: "/update-password" };
+      }
+
       return { success: true, redirectTo: "/" };
     } catch (error: any) {
       return {
@@ -34,11 +39,31 @@ export const authProvider: AuthProvider = {
       redirectTo: "/login",
     };
   },
-
-  // Verifica si el usuario está autenticado (Se llama en cada cambio de ruta)
+  // Verificación de autenticación: Comprueba si el token y la información del usuario están presentes en el almacenamiento local
   check: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
-    return token ? {authenticated: true } : { authenticated: false, redirectTo: "/login" };
+    const userStr = localStorage.getItem(USER_KEY);
+
+    if (token && userStr) {
+      const user = JSON.parse(userStr);
+
+      // Si el usuario necesita cambiar su contraseña, lo redirigimos
+      if (user.isFirstLogin && window.location.pathname !== "/update-password") {
+        // Si Refine no redirige solo, lo forzamos nosotros
+        window.location.assign("/update-password");
+        return {
+          authenticated: true,
+          redirectTo: "/update-password",
+        };
+      }
+
+      return { authenticated: true };
+    }
+
+    return {
+      authenticated: false,
+      redirectTo: "/login",
+    };
   },
 
   // Obtiene los permisos del usuario (en este caso, el rol) para controlar el acceso a ciertas partes de la aplicación
