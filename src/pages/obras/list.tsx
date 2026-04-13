@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { DeleteButton, EditButton, List, ShowButton, useDataGrid } from "@refinedev/mui";
 import { Content, ObraResponseListDTO } from "../../interfaces/obra";
-import { HttpError, useDelete } from "@refinedev/core";
+import { CanAccess, HttpError, useDelete } from "@refinedev/core";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Backdrop, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
 import { StatusTag } from "../../components/obras/StatusTag";
@@ -106,18 +106,27 @@ export const ObraList = () => {
                             mutationMode="pessimistic"
                         />
                         */}
-                        {/* Usamos un IconButton normal en lugar del DeleteButton de Refine 
-            para tener el control total del evento */}
-                        <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => {
-                                setSelectedId(row.id);
-                                setOpenConfirm(true);
-                            }}
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
+
+                            <CanAccess
+                                resource="obra"
+                                action="delete"
+                                fallback={null}
+                            >
+
+                                {/* Usamos un IconButton normal en lugar del DeleteButton de Refine 
+                    para tener el control total del evento */}
+                                <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => {
+                                        setSelectedId(row.id);
+                                        setOpenConfirm(true);
+                                    }}
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </CanAccess>
+
 
                     </Stack>
 

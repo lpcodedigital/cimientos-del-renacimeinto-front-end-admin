@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { UserDTO } from "../../interfaces/user/user";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Typography } from "@mui/material";
-import { useDelete } from "@refinedev/core";
+import { CanAccess, useDelete } from "@refinedev/core";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export const UserList: React.FC = () => {
@@ -88,16 +88,23 @@ export const UserList: React.FC = () => {
                     <Stack direction="row" spacing={1}>
                         <EditButton hideText size="small" recordItemId={row.idUser} />
                         <ShowButton hideText size="small" recordItemId={row.idUser} />
-                        <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => {
-                                setSelectedId(row.idUser);
-                                setOpenConfirm(true);
-                            }}
+
+                        <CanAccess
+                            resource="user"
+                            action="delete"
+                            fallback={null}
                         >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
+                            <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => {
+                                    setSelectedId(row.idUser);
+                                    setOpenConfirm(true);
+                                }}
+                            >
+                                <DeleteIcon fontSize="small" />
+                            </IconButton>
+                        </CanAccess>
                     </Stack>
                 ),
             },
