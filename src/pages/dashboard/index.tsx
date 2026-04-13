@@ -7,8 +7,16 @@ import PaidIcon from '@mui/icons-material/Paid';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { MunucipalityChart } from "../../components/dashboard/MunucipalityChart";
 import { StatusChart } from "../../components/dashboard/StatusChart";
+import { Navigate } from "react-router";
 
 export const DashboardPage: React.FC = () => {
+
+    const userStr = localStorage.getItem("user");
+    const user = JSON.parse(userStr || "{}");
+
+    if (user.isFirstLogin) {
+        return <Navigate to="/update-password" replace />;
+    }
 
     // 1. Llamamos al hook y extraemos query
     const { query } = useDashboardStats();
