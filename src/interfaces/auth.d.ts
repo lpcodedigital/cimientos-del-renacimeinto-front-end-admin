@@ -2,6 +2,7 @@ export interface LoginResponse {
     token:     string;
     expiresAt: Date;
     user:      User;
+    mfaRequired: boolean;
 }
 
 export interface User {
@@ -11,4 +12,9 @@ export interface User {
     active: boolean;
     role:   string;
     isFirstLogin: boolean;
+}
+
+export interface Verify2FAResponseDTO {
+    email: string;
+    code:  string;
 }

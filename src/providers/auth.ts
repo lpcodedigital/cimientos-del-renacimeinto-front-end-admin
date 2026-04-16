@@ -1,6 +1,6 @@
 import type { AuthProvider } from "@refinedev/core";
 import { axiosInstance } from "../api/axiosInstance";
-import { TOKEN_KEY, USER_KEY } from "./constants";
+import { TOKEN_KEY, USER_KEY, MFA_EMAIL_KEY } from "./constants";
 import { LoginResponse } from "../interfaces/auth";
 
 export const authProvider: AuthProvider = {
@@ -10,15 +10,25 @@ export const authProvider: AuthProvider = {
     try {
       const { data } = await axiosInstance.post<LoginResponse>("/auth/login", { email, password });
 
-      localStorage.setItem(TOKEN_KEY, data.token);
+      // Caso A: Si el backend indica que se requiere MFA, almacenamos el email para el proceso de MFA y redirigimos al usuario a la página de MFA
+      if (data.mfaRequired) {
+        localStorage.setItem(MFA_EMAIL_KEY, email);
+        return { success: true, redirectTo: "/verify-2fa" };
+      }
 
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      // Caso B: Si no se requiere MFA, almacenamos el token y la información del usuario en el almacenamiento local y redirigimos al usuario a la página principal o a la actualización de contraseña si es su primer login
 
-      if (data.user.isFirstLogin) {
-        return { success: true, redirectTo: "/update-password" };
+      if (data.token && data.user) {
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+  
+        if (data.user.isFirstLogin) {
+          return { success: true, redirectTo: "/update-password" };
+        }
       }
 
       return { success: true, redirectTo: "/" };
+
     } catch (error: any) {
       return {
         success: false,

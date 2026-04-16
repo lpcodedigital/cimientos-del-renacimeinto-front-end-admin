@@ -41,6 +41,7 @@ import { UserCreate } from "./pages/users/create";
 import { UserEdit } from "./pages/users/edit";
 import { UpdatePassword } from "./pages/updatePassword/UpdatePassword";
 import { accessControlProvider } from "./providers/accessControl";
+import { Verify2FA } from "./pages/login/Verify2FA";
 
 function App() {
 
@@ -166,6 +167,7 @@ function App() {
                           }
                         />
                       } />
+                    <Route path="/verify-2fa" element={<Verify2FA />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                   </Route>
