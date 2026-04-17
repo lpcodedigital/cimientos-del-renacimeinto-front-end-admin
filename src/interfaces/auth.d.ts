@@ -18,3 +18,7 @@ export interface Verify2FAResponseDTO {
     email: string;
     code:  string;
 }
+
+export interface Resend2FADTO {
+    email: string;
+}
