@@ -149,6 +149,9 @@ function App() {
                       </Authenticated>
                     }
                   />
+
+                  <Route path="/verify-2fa" element={<Verify2FA />} />
+
                   <Route
                     element={
                       <Authenticated key="authenticated-outer" fallback={<Outlet />}>
@@ -167,7 +170,7 @@ function App() {
                           }
                         />
                       } />
-                    <Route path="/verify-2fa" element={<Verify2FA />} />
+                    
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                   </Route>

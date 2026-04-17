@@ -1,19 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, TextField, Typography, Card, Container, Backdrop, CircularProgress } from "@mui/material";
-import { useCustomMutation, useGo } from "@refinedev/core";
+import { useCustomMutation, useGo, useNotification } from "@refinedev/core";
 import { useForm } from "react-hook-form";
 import { TOKEN_KEY, USER_KEY, MFA_EMAIL_KEY } from "../../providers/constants";
-import { Verify2FAResponseDTO, LoginResponse } from "../../interfaces/auth";
+import { Verify2FAResponseDTO, LoginResponse, Resend2FADTO } from "../../interfaces/auth";
+import { Link } from "react-router";
 
 export const Verify2FA: React.FC = () => {
     const go = useGo();
-    const { mutate, mutation } = useCustomMutation();
-    const { isPending } = mutation;
+    const { open } = useNotification();
+    const [seconds, setSeconds] = useState(60);
     
+    const { mutate: verifyMutate, mutation: verifyMutation } = useCustomMutation();
+    const { mutate: resentMutate, mutation: resentMutation } = useCustomMutation();
+
+    const { isPending } = verifyMutation;
+
     // Obtenemos el email que guardamos en el login
     const mfaEmail = localStorage.getItem(MFA_EMAIL_KEY);
-
     const { register, handleSubmit, formState: { errors } } = useForm();
+
+    // Timer para reactivar el botón de reenvío
+    useEffect(() => {
+        const timer = seconds > 0 && setInterval(() => setSeconds(seconds - 1), 1000);
+        return () => clearInterval(timer as any);
+    }, [seconds]);
 
     // Si alguien intenta entrar a esta ruta sin haber pasado por el login, lo regresamos
     if (!mfaEmail) {
@@ -21,6 +32,7 @@ export const Verify2FA: React.FC = () => {
         return null;
     }
 
+    // Acción para verificar
     const onSubmit = (values: any) => {
 
         const payload: Verify2FAResponseDTO = {
@@ -28,7 +40,7 @@ export const Verify2FA: React.FC = () => {
             code: values.code
         };
 
-        mutate({
+        verifyMutate({
             url: "auth/verify-2fa",
             method: "post",
             values: payload,
@@ -40,14 +52,44 @@ export const Verify2FA: React.FC = () => {
                 localStorage.setItem(USER_KEY, JSON.stringify(data.user));
                 
                 // 2. Limpiamos el email temporal
-                localStorage.removeItem("sib_mfa_email");
+                localStorage.removeItem(MFA_EMAIL_KEY);
 
                 // 3. Verificamos si debe cambiar password o ir al inicio
-                if (data.user.isFirstLogin) {
-                    go({ to: "/update-password" });
-                } else {
-                    go({ to: "/" });
-                }
+                go({ to: data.user.isFirstLogin ? "/update-password" : "/" });
+            }
+        });
+    };
+
+    // Acción para reenviar
+    const handleResend = () => {
+
+        if (seconds > 0 || resentMutation.isPending) return; // Evitamos que se pueda hacer spam y doble click
+
+        const payload: Resend2FADTO = {
+            email: mfaEmail
+        };
+
+        resentMutate({
+            url: "auth/resend-2fa",
+            method: "post",
+            values: payload,
+        }, {
+            onSuccess: () => {
+                open?.({
+                    type: "success",
+                    message: "Código reenviado",
+                    description: "Se ha enviado un nuevo código a su correo electronico."
+                });
+                setSeconds(60); // Reiniciamos el timer
+            },
+            onError: (err: any) => {
+                open?.({
+                    type: "error",
+                    message: err?.response?.data?.message || "Error al reenviar",
+                    description: "No se pudo enviar el código. Por favor intente de nuevo."
+                });
+                localStorage.removeItem(MFA_EMAIL_KEY); // Limpiamos el email para evitar que el usuario quede atorado en esta pantalla
+                go({ to: "/login" }); // Regresamos al login para evitar que el usuario quede atorado en esta pantalla si hay un error con el correo
             }
         });
     };
@@ -86,6 +128,37 @@ export const Verify2FA: React.FC = () => {
                             Verificar y Entrar
                         </Button>
                     </form>
+
+                    <Box sx={{ mt: 3, textAlign: "center" }}>
+                        <Typography variant="caption" color="text.secondary">
+                            ¿No recibiste el código?
+                        </Typography>
+                        <Box sx={{ mt: 1 }}>
+                            {seconds > 0 ? (
+                                <Typography variant="caption" sx={{ fontWeight: "bold", color: "primary.main" }}>
+                                    Reenviar en {seconds}s
+                                </Typography>
+                            ) : (
+                                <Button 
+                                    variant="text" 
+                                    size="small"
+                                    onClick={handleResend} 
+                                    sx={{ 
+                                        textTransform: "none", 
+                                        fontSize: "0.875rem",
+                                        fontWeight: "bold",
+                                        minWidth: "auto",
+                                        p: 0,
+                                        verticalAlign: "bottom"
+
+                                    }}
+                                >
+                                    Reenviar Código
+                                </Button>
+                            )}
+                        </Box>
+                    </Box>
+
                 </Card>
             </Container>
         </Box>

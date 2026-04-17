@@ -53,6 +53,9 @@ export const authProvider: AuthProvider = {
   check: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     const userStr = localStorage.getItem(USER_KEY);
+    const mfaEmail = localStorage.getItem(MFA_EMAIL_KEY);
+
+    // Caso 1: Usuario con sesión activa (token + user)
 
     if (token && userStr) {
       const user = JSON.parse(userStr);
@@ -70,6 +73,12 @@ export const authProvider: AuthProvider = {
       return { authenticated: true };
     }
 
+    // Caso 2: Usuario en proceso de 2FA (email temporal sin token) no lo expulsa
+    if (mfaEmail && window.location.pathname === "/verify-2fa") {
+      return { authenticated: false }; // No está autenticado, pero no mandamos redirectTo
+    }
+
+    // Caso 3: Usuario sin sesión activa, lo redirigimos al login
     return {
       authenticated: false,
       redirectTo: "/login",
