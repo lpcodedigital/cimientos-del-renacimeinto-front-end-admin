@@ -42,6 +42,11 @@ import { UserEdit } from "./pages/users/edit";
 import { UpdatePassword } from "./pages/updatePassword/UpdatePassword";
 import { accessControlProvider } from "./providers/accessControl";
 import { Verify2FA } from "./pages/login/Verify2FA";
+import { CursoList } from "./pages/curso/list";
+import SchoolIcon from "@mui/icons-material/School";
+import { CursoCreate } from "./pages/curso/create";
+import { CursoEdit } from "./pages/curso/edit";
+import { CursoShow } from "./pages/curso/show";
 
 function App() {
 
@@ -95,11 +100,29 @@ function App() {
                       icon: <PeopleIcon />,
                     },
                   },
+                  {
+                    name: "curso",
+                    list: "/cursos",
+                    show: "/cursos/show/:id",
+                    create: "/cursos/create",
+                    edit: "/cursos/edit/:id",
+                    meta: {
+                      label: "Cursos",
+                      icon: <SchoolIcon />,
+                    },
+                  },
                   // Recurso "role" para cargar los roles en el catálogo de userCreate y userEdit
                   {
                     name: "role",
                     meta: {
                       label: "Roles",
+                    }
+                  },
+                  {
+                    name: "municipio",
+                    meta: {
+                      lanel: "Municipios",
+                      hide: true, // <--- Esto oculta el recurso del menú
                     }
                   },
                 ]}
@@ -130,6 +153,12 @@ function App() {
                       <Route path="/obras/show/:id" element={<ObraShow />} />
                       <Route path="create" element={<ObraCreate />} />
                       <Route path="edit/:id" element={<ObraEdit />} />
+                    </Route>
+                    <Route path="/cursos">
+                      <Route index element={<CursoList />} />
+                      <Route path="/cursos/show/:id" element={<CursoShow />} />
+                      <Route path="create" element={<CursoCreate />} />
+                      <Route path="edit/:id" element={<CursoEdit />} />
                     </Route>
                     <Route path="/users">
                       <Route index element={<UserList />} />
