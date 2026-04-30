@@ -10,6 +10,9 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export const CursoEdit = () => {
+    // 1. Añadimos estado para validar la portada
+    const [coverError, setCoverError] = useState(false);
+
     // Estados para las fotos nuevas
     const [originalCoverId, setOriginalCoverId] = useState<number | null>(null);
     const [newCoverFile, setNewCoverFile] = useState<any | null>(null);
@@ -58,6 +61,17 @@ export const CursoEdit = () => {
     }, [cursoData]);
 
     const handleCustomSubmit = (values: any) => {
+        // VALIDACIÓN: ¿Hay alguna portada disponible? (Nueva o Existente)
+        const hasCover = newCoverFile || existingCover;
+
+        if (!hasCover) {
+            setCoverError(true);
+            // Hacemos scroll hacia arriba para que el usuario vea el error
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        setCoverError(false);
         // 1. Array de IDs que se quedan
         let keepImageIds: number[] = [];
 
@@ -158,8 +172,23 @@ export const CursoEdit = () => {
 
                         {/* SECCIÓN PORTADA */}
                         <Grid2 size={12}>
-                            <Paper variant="outlined" sx={{ p: 2, borderStyle: 'dashed' }}>
-                                <Typography variant="subtitle2" gutterBottom>PORTADA ACTUAL / NUEVA</Typography>
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    p: 2,
+                                    borderStyle: 'dashed',
+                                    borderColor: coverError ? 'error.main' : 'divider',
+                                    bgcolor: coverError ? '#fff5f5' : 'inherit',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                <Typography
+                                    variant="subtitle2"
+                                    gutterBottom
+                                    color={coverError ? "error" : "textPrimary"}
+                                >
+                                    PORTADA ACTUAL / NUEVA {coverError && " - (LA PORTADA ES OBLIGATORIA)"}
+                                </Typography>
 
                                 <Box sx={{ mt: 2, display: 'flex', gap: 3, alignItems: 'flex-start' }}>
                                     {newCoverFile ? (
@@ -193,15 +222,25 @@ export const CursoEdit = () => {
                                             </IconButton>
                                         </Box>
                                     ) : (
-                                        <Box sx={{ width: 150, height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'divider', borderRadius: 2 }}>
-                                            <Typography variant="caption" color="textSecondary">Sin portada</Typography>
+                                        <Box sx={{
+                                            width: 150,
+                                            height: 100,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            bgcolor: 'divider',
+                                            borderRadius: 2,
+                                            border: coverError ? '1px solid red' : 'none'
+                                        }}>
+                                            <Typography variant="caption" color="error">Sin portada seleccionada</Typography>
                                         </Box>
                                     )}
 
                                     <Stack spacing={1}>
                                         <Button
                                             component="label"
-                                            variant="outlined"
+                                            variant={coverError ? "contained" : "outlined"}
+                                            color={coverError ? "error" : "primary"}
                                             startIcon={<AddPhotoAlternateIcon />}
                                             sx={{ textTransform: 'none' }}
                                         >
@@ -209,15 +248,15 @@ export const CursoEdit = () => {
                                             <input type="file" hidden accept="image/*" onChange={(e) => {
                                                 const file = e.target.files?.[0];
                                                 if (file) {
-
                                                     setNewCoverFile({ originFileObj: file });
                                                     setExistingImages(prev => prev.filter(img => img.id !== originalCoverId));
                                                     setExistingCover(null);
+                                                    setCoverError(false); // Quitamos el error al seleccionar
                                                 }
                                             }} />
                                         </Button>
                                         <Typography variant="caption" color="textSecondary">
-                                            Formatos: JPG, PNG. Máx 5MB.
+                                            Formatos: JPG, PNG. Máx 10MB.
                                         </Typography>
                                     </Stack>
                                 </Box>
