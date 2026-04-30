@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { RefineThemes } from "@refinedev/mui";
 import React, {
   PropsWithChildren,
@@ -41,6 +41,33 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
     }
   };
 
+  // 1. Definimos el tema personalizado
+  const customTheme = createTheme({
+    ...RefineThemes.Blue, // Copiamos la base de Refine (tipografía, etc.)
+    palette: {
+      ...RefineThemes.Blue.palette,
+      mode: mode as "light" | "dark",
+      primary: {
+        main: "#901b45", // <--- TU COLOR INSTITUCIONAL (Vino / Yucatán)
+        contrastText: "#ffffff",
+      },
+      secondary: {
+        main: "#d4a373", // <--- COLOR DE ACENTO (Mostaza / Caramelo)
+      },
+    },
+  });
+
+  const customThemeDark = createTheme({
+    ...RefineThemes.BlueDark,
+    palette: {
+      ...RefineThemes.BlueDark.palette,
+      mode: "dark",
+      primary: {
+        main: "#c6943d", // Color un poco más brillante para el modo oscuro
+      },
+    },
+  });
+
   return (
     <ColorModeContext.Provider
       value={{
@@ -50,7 +77,7 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
     >
       <ThemeProvider
         // you can change the theme colors here. example: mode === "light" ? RefineThemes.Magenta : RefineThemes.MagentaDark
-        theme={mode === "light" ? RefineThemes.Blue : RefineThemes.BlueDark}
+        theme={mode === "light" ? customTheme : customThemeDark}
       >
         {children}
       </ThemeProvider>

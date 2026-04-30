@@ -158,7 +158,7 @@ export const CursoEdit = () => {
 
                         {/* SECCIÓN PORTADA */}
                         <Grid2 size={12}>
-                            <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f0f4f8', borderStyle: 'dashed' }}>
+                            <Paper variant="outlined" sx={{ p: 2, borderStyle: 'dashed' }}>
                                 <Typography variant="subtitle2" gutterBottom>PORTADA ACTUAL / NUEVA</Typography>
 
                                 <Box sx={{ mt: 2, display: 'flex', gap: 3, alignItems: 'flex-start' }}>

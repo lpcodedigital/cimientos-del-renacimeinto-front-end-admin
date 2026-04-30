@@ -142,7 +142,7 @@ export const CursoCreate = () => {
 
                         {/* SECCIÓN PORTADA */}
                         <Grid2 size={12}>
-                            <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f9f9f9', borderStyle: 'dashed' }}>
+                            <Paper variant="outlined" sx={{ p: 2, borderStyle: 'dashed' }}>
                                 <Typography variant="subtitle2" gutterBottom>PORTADA DEL CURSO</Typography>
                                 <Button component="label" variant="contained" startIcon={<AddPhotoAlternateIcon />}>
                                     Seleccionar Portada

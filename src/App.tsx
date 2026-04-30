@@ -47,12 +47,13 @@ import SchoolIcon from "@mui/icons-material/School";
 import { CursoCreate } from "./pages/curso/create";
 import { CursoEdit } from "./pages/curso/edit";
 import { CursoShow } from "./pages/curso/show";
+import { i18nProvider } from "./langs/es";
 
 function App() {
 
   return (
     <BrowserRouter>
-      <GitHubBanner />
+      
       <RefineKbarProvider>
         <ColorModeContextProvider>
           <CssBaseline />
@@ -60,6 +61,7 @@ function App() {
           <RefineSnackbarProvider>
             <DevtoolsProvider>
               <Refine
+                i18nProvider={i18nProvider}
                 accessControlProvider={accessControlProvider}
                 dataProvider={dataProvider}
                 authProvider={authProvider}
@@ -140,7 +142,7 @@ function App() {
                         key="authenticated-inner"
                         fallback={<CatchAllNavigate to="/login" />}
                       >
-                        <ThemedLayout Header={Header} Title={Title}>
+                        <ThemedLayout Header={Header} Title={Title} >
                           <Outlet />
                         </ThemedLayout>
                       </Authenticated>
@@ -188,18 +190,32 @@ function App() {
                       </Authenticated>
                     }
                   >
-                    <Route path="/login"
+                    <Route
+                      path="/login"
                       element={
                         <AuthPage
                           type="login"
+                          registerLink={false}
+                          forgotPasswordLink={false}
+                          rememberMe={false}
                           title={
-                            <Typography variant="h5" fontWeight={700}>
-                              SIB ADMIN
-                            </Typography>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                              <img src="/logo.png" alt="Logo CR" style={{ width: '60px' }} />
+                              <Typography variant="h5" fontWeight={700} color="primary">
+                                Cimientos Del Renacimiento
+                              </Typography>
+                            </div>
                           }
+                          // Opcional: Si quieres quitar el "Powered by refine" del fondo
+                          wrapperProps={{
+                            style: {
+                              background: "#f0f2f5",
+                            }
+                          }}
                         />
-                      } />
-                    
+                      }
+                    />
+
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                   </Route>
@@ -207,7 +223,26 @@ function App() {
 
                 <RefineKbar />
                 <UnsavedChangesNotifier />
-                <DocumentTitleHandler />
+                <DocumentTitleHandler
+                  handler={(options) => {
+                    // 1. Si estamos en una página de Auth (como el Login)
+                    if (window.location.pathname === "/login") {
+                      return "Iniciar Sesión | CR";
+                    }
+
+                    // 2. Intentamos obtener el nombre del recurso traducido o el label
+                    const resourceName = options.resource?.meta?.label || options.resource?.name;
+
+                    // 3. Si hay una acción específica (edit, create, show)
+                    const action = options.action ? ` - ${options.action}` : "";
+
+                    if (!resourceName) {
+                      return "CR - Panel Administrativo";
+                    }
+
+                    return `${resourceName}${action} | CR`;
+                  }}
+                />
               </Refine>
               <DevtoolsPanel />
             </DevtoolsProvider>
