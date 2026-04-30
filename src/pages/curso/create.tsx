@@ -9,6 +9,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 export const CursoCreate = () => {
+    const [coverError, setCoverError] = useState(false);
     const [coverFile, setCoverFile] = useState<any | null>(null);
     const [galleryFiles, setGalleryFiles] = useState<any[]>([]);
 
@@ -32,6 +33,13 @@ export const CursoCreate = () => {
 
     // Función para procesar y enviar
     const handleCustomSubmit = (values: any) => {
+        // VALIDACIÓN CRÍTICA: Si no hay portada, detenemos el envío
+        if (!coverFile) {
+            setCoverError(true);
+            return;
+        }
+        setCoverError(false);
+
         // REORDENAMIENTO: Portada siempre en índice 0
         const finalFiles: any[] = [];
 
@@ -142,14 +150,29 @@ export const CursoCreate = () => {
 
                         {/* SECCIÓN PORTADA */}
                         <Grid2 size={12}>
-                            <Paper variant="outlined" sx={{ p: 2, borderStyle: 'dashed' }}>
-                                <Typography variant="subtitle2" gutterBottom>PORTADA DEL CURSO</Typography>
-                                <Button component="label" variant="contained" startIcon={<AddPhotoAlternateIcon />}>
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    p: 2,
+                                    borderStyle: 'dashed',
+                                    borderColor: coverError ? 'error.main' : 'inherit', // Poner rojo si hay error
+                                    bgcolor: coverError ? '#fff5f5' : 'inherit'
+                                }}
+                            >
+                                <Typography
+                                    variant="subtitle2"
+                                    color={coverError ? "error" : "inherit"}
+                                    gutterBottom
+                                >
+                                    PORTADA DEL CURSO * {coverError && "(Es obligatoria)"}
+                                </Typography>
+                                <Button component="label" variant="contained" startIcon={<AddPhotoAlternateIcon />} color={coverError ? "error" : "primary"}>
                                     Seleccionar Portada
                                     <input type="file" hidden accept="image/*"
                                         onChange={(e) => {
                                             const file = e.target.files?.[0];
                                             if (file) setCoverFile({ originFileObj: file });
+                                            setCoverError(false); // Limpiar error al seleccionar
                                         }}
                                     />
                                 </Button>
