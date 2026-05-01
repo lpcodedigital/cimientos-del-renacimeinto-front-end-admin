@@ -3,12 +3,15 @@ import { UserDTO, UserRequestDTO } from "../../interfaces/user/user";
 import { Edit, useAutocomplete } from "@refinedev/mui";
 import { Autocomplete, Backdrop, Box, Checkbox, CircularProgress, FormControlLabel, Stack, TextField, Typography } from "@mui/material";
 import { RoleDTO } from "../../interfaces/role/role";
+import { control } from "leaflet";
+import { Controller } from "react-hook-form";
 
 export const UserEdit: React.FC = () => {
 
     const {
         saveButtonProps,
         register,
+        control,
         formState: { errors },
         setValue,
         refineCore: { query, formLoading },
@@ -35,9 +38,11 @@ export const UserEdit: React.FC = () => {
 
     const userData = query?.data?.data;
 
+    console.log(userData);
+
     //Determinamos mensaje dinamico
-    const loadingMessage = query?.isLoading 
-        ? "Cargando datos del usuario..." 
+    const loadingMessage = query?.isLoading
+        ? "Cargando datos del usuario..."
         : "Actualizando información del usuario...";
 
     return (
@@ -60,7 +65,7 @@ export const UserEdit: React.FC = () => {
                     alignItems="center"
                 >
                     <Typography variant="h6">
-                       {loadingMessage}
+                        {loadingMessage}
                     </Typography>
                     <Typography variant="caption">
                         Esto puede tardar unos segundos.
@@ -185,23 +190,36 @@ export const UserEdit: React.FC = () => {
                         )}
                     />
 
-                    <Stack
-                        direction="row" spacing={4}
-                    >
+                    <Stack direction="row" spacing={4}>
                         <FormControlLabel
                             control={
-                                <Checkbox
-                                    {...register("active")}
-                                    defaultChecked={userData?.active} // El checkbox reflejará el estado actual del usuario
+                                <Controller
+                                    name="active"
+                                    control={control} // Asegúrate de extraer 'control' de useForm
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            {...field}
+                                            checked={!!field.value} // Forzamos a booleano
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                        />
+                                    )}
                                 />
                             }
                             label="Usuario activo"
                         />
+
                         <FormControlLabel
                             control={
-                                <Checkbox
-                                    {...register("twoFactorEnabled")}
-                                    defaultChecked={userData?.twoFactorEnabled} // El checkbox reflejará el estado actual del usuario
+                                <Controller
+                                    name="twoFactorEnabled"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            {...field}
+                                            checked={!!field.value}
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                        />
+                                    )}
                                 />
                             }
                             label="2FA Habilitado"
