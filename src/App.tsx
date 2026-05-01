@@ -197,7 +197,7 @@ function App() {
                         <AuthPage
                           type="login"
                           registerLink={false}
-                          forgotPasswordLink={false}
+                          //forgotPasswordLink={false}
                           rememberMe={false}
                           title={
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>

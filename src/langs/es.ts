@@ -7,6 +7,9 @@ export const i18nProvider = {
             "pages.login.fields.password": "Contraseña",
             "pages.login.fields.rememberMe": "Recordarme",
             "pages.login.title": "Ingreso SIB",
+            "pages.login.buttons.forgotPassword": "¿Olvidaste tu contraseña?",
+            "pages.login.buttons.noAccount": "¿No tienes cuenta?",
+            "pages.login.buttons.signup": "Registrarse",
 
             // Botones y Acciones Globales (Cruciales)
             "buttons.create": "Crear Nuevo",
