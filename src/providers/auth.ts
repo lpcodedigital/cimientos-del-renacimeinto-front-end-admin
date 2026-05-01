@@ -13,7 +13,8 @@ export const authProvider: AuthProvider = {
       // Caso A: Si el backend indica que se requiere MFA, almacenamos el email para el proceso de MFA y redirigimos al usuario a la página de MFA
       if (data.mfaRequired) {
         localStorage.setItem(MFA_EMAIL_KEY, email);
-        return { success: true, redirectTo: "/verify-2fa" };
+        window.location.assign("/verify-2fa");
+        return { success: true };
       }
 
       // Caso B: Si no se requiere MFA, almacenamos el token y la información del usuario en el almacenamiento local y redirigimos al usuario a la página principal o a la actualización de contraseña si es su primer login
@@ -75,7 +76,7 @@ export const authProvider: AuthProvider = {
 
     // Caso 2: Usuario en proceso de 2FA (email temporal sin token) no lo expulsa
     if (mfaEmail && window.location.pathname === "/verify-2fa") {
-      return { authenticated: false }; // No está autenticado, pero no mandamos redirectTo
+      return { authenticated: true }; // No está autenticado, pero no mandamos redirectTo
     }
 
     // Caso 3: Usuario sin sesión activa, lo redirigimos al login

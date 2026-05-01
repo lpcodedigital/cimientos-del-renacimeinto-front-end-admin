@@ -135,6 +135,9 @@ function App() {
                 }}
               >
                 <Routes>
+                  {/* 1. Ruta de Verificación (Pública Absoluta) */}
+                  <Route path="/verify-2fa" element={<Verify2FA />} />
+                  
                   {/* Rutas Protegidas */}
                   <Route
                     element={
@@ -180,8 +183,6 @@ function App() {
                       </Authenticated>
                     }
                   />
-
-                  <Route path="/verify-2fa" element={<Verify2FA />} />
 
                   <Route
                     element={
