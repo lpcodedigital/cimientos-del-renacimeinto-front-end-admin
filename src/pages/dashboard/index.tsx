@@ -2,12 +2,15 @@ import React from "react";
 import { StatCard } from "../../components/dashboard/StatCard";
 import { useDashboardStats } from "../../hooks/dashboard/useDashboardStats"
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
-import SpeedIcon from '@mui/icons-material/Speed';
-import PaidIcon from '@mui/icons-material/Paid';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { MunucipalityChart } from "../../components/dashboard/MunucipalityChart";
 import { StatusChart } from "../../components/dashboard/StatusChart";
 import { Navigate } from "react-router";
+import SchoolIcon from '@mui/icons-material/School';
+import PeopleIcon from '@mui/icons-material/People';
+import MapIcon from '@mui/icons-material/Map';
+import { AgencyChart } from "../../components/dashboard/AgencyChart.tsx";
+import BusinessIcon from '@mui/icons-material/Business';
 
 export const DashboardPage: React.FC = () => {
 
@@ -18,13 +21,9 @@ export const DashboardPage: React.FC = () => {
         return <Navigate to="/update-password" replace />;
     }
 
-    // 1. Llamamos al hook y extraemos query
     const { query } = useDashboardStats();
-
-    // 2. Extremos la data y los estados de carga de query
     const { data: response, isLoading, isError } = query;
 
-    // 3. Manejo de estados de carga y error (SOLID: Robustez)
     if (isLoading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
@@ -34,53 +33,45 @@ export const DashboardPage: React.FC = () => {
     }
 
     if (isError) {
-        return <Typography color="error">Error al conectar con el servidor de Mérida.</Typography>;
+        return <Typography color="error" sx={{ p: 3 }}>Error al conectar con el servidor de Mérida.</Typography>;
     }
 
-    // 4. Extraemos los stats. 
-    // 'response' es la respuesta de React Query, 'data.data' es tu DashboardStatsDTO del Backend.
     const stats = response?.data;
 
     return (
         <Box
             sx={{
-                p: 3
+                p: 3,
             }}
         >
             <Typography
                 variant="h4"
                 sx={{
                     mb: 4,
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    color: "#023047"
                 }}
             >
                 Cimientos del Renacimiento
             </Typography>
 
-            <Grid2
-                container
-                spacing={3}
-            >
-                {/* --- FILA 1: KPI CARDS --- */}
-                <Grid2
-                    size={{
-                        xs: 12,
-                        md: 4
-                    }}
-                >
+            {/* Usamos disableEqualOverflow para ayudar con los márgenes del Grid */}
+            <Grid2 container spacing={3} sx={{
+                    width: "100%",
+                    margin: 0 // 2. Forzamos a que el grid no se salga de su contenedor
+                }}>
+                
+                {/* --- SECCIÓN OBRAS (4 tarjetas que suman 12 en MD) --- */}
+                
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatCard
-                        title="Inversión Total"
-                        value={`$${stats?.totalInvestment.toLocaleString()}`}
-                        icon={<PaidIcon color="success" sx={{ fontSize: 40 }} />}
+                        title="Ejecutoras"
+                        value={stats?.totalAgency.toString() || "0"} // Corregido: totalAgencies
+                        icon={<BusinessIcon color="warning" sx={{ fontSize: 40 }} />}
                     />
                 </Grid2>
 
-                <Grid2
-                    size={{
-                        xs: 12,
-                        md: 4
-                    }}
-                >
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatCard
                         title="Obras Activas"
                         value={stats?.totalObras.toString() || "0"}
@@ -88,37 +79,61 @@ export const DashboardPage: React.FC = () => {
                     />
                 </Grid2>
 
-                <Grid2
-                    size={{
-                        xs: 12,
-                        md: 4
-                    }}
-                >
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <StatCard
-                        title="Avance General"
-                        value={`${stats?.averageProgress.toFixed(1)}%`}
-                        icon={<SpeedIcon color="warning" sx={{ fontSize: 40 }} />}
+                        title="Cobertura"
+                        value={`${stats?.municipalitiesWithObras} / 106`}
+                        icon={<MapIcon color="primary" sx={{ fontSize: 40 }} />}
+                    />
+                </Grid2>
+
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                    <StatCard
+                        title="Capacitación"
+                        value={stats?.totalCursos.toString() || "0"}
+                        icon={<SchoolIcon color="secondary" sx={{ fontSize: 40 }} />}
+                    />
+                </Grid2>
+
+                {/* --- SECCIÓN SOCIAL --- */}
+                <Grid2 size={12} sx={{ mt: 2 }}>
+                    <Typography variant="h6" fontWeight="bold">Gestión y Usuarios</Typography>
+                </Grid2>
+
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                    <StatCard
+                        title="Usuarios Totales"
+                        value={stats?.totalUsers.toString() || "0"}
+                        icon={<PeopleIcon color="primary" sx={{ fontSize: 40 }} />}
+                    />
+                </Grid2>
+
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                    <StatCard
+                        title="Personal Activo"
+                        value={`${stats?.activeUsers} / ${stats?.totalUsers}`}
+                        icon={<PeopleIcon color="success" sx={{ fontSize: 40 }} />}
                     />
                 </Grid2>
 
                 {/* --- FILA 2: GRÁFICAS --- */}
-                {/* Gráfica de Barras - Ocupa 8 columnas en pantallas grandes */}
                 <Grid2 size={{ xs: 12, lg: 8 }}>
                     {stats?.countByMunicipality && (
                         <MunucipalityChart data={stats.countByMunicipality} />
                     )}
                 </Grid2>
 
-                {/* Gráfica de Dona - Ocupa 4 columnas */}
                 <Grid2 size={{ xs: 12, lg: 4 }}>
                     {stats?.countByStatus && (
                         <StatusChart data={stats.countByStatus} />
                     )}
                 </Grid2>
 
-
+                {/* --- FILA 3: ANÁLISIS DE EJECUTORAS --- */}
+                <Grid2 size={12}>
+                    <AgencyChart data={stats?.countByAgency || {}} />
+                </Grid2>
             </Grid2>
         </Box>
-
     );
-}
+};
