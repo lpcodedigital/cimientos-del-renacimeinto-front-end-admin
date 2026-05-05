@@ -2,7 +2,7 @@
 import { AccessControlProvider } from "@refinedev/core";
 
 export const accessControlProvider: AccessControlProvider = {
-  can: async ({ resource, action }) => {
+  can: async ({ action }) => {
     const userStr = localStorage.getItem("sib-user-data");
     if (!userStr) return { can: false };
 

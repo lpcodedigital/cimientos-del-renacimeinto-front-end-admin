@@ -1,5 +1,5 @@
 export const i18nProvider = {
-    translate: (key: string, params: any, defaultMessage?: string) => {
+    translate: (key: string, _params: any, defaultMessage?: string) => {
         const translations: Record<string, string> = {
             // Login & Auth
             "pages.login.signin": "Iniciar Sesión",
@@ -74,6 +74,6 @@ export const i18nProvider = {
         return translations[key] || defaultMessage || key;
     },
 
-    changeLocale: (lang: string) => Promise.resolve(),
+    changeLocale: (_lang: string) => Promise.resolve(),
     getLocale: () => "es",
 };
