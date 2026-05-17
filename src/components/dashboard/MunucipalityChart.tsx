@@ -40,7 +40,7 @@ export const MunucipalityChart: React.FC<MunucipalityChartProps> = ({ data }) =>
             {/* 2. El contenedor DEBE tener una altura fija para que el Chart sepa cuánto medir */}
             <Box sx={{ 
                 width: "100%", 
-                height: 350, 
+                height: 380, 
                 minHeight: 350, 
                 display: "flex", 
                 flexDirection: "column", 
@@ -50,17 +50,34 @@ export const MunucipalityChart: React.FC<MunucipalityChartProps> = ({ data }) =>
                 {isMounted && (
                     // 3. Solo renderiza si ya estamos montados
                     <ResponsiveContainer 
-                        width="99%" 
-                        aspect={2} // samos aspect (relación ancho/alto, ej: 2 significa que es el doble de ancho que de alto)
+                        width="100%"
+                        height="100%" 
                         >
-                        <BarChart data={chartData}>
+                        <BarChart 
+                            data={chartData}
+                            margin={{ top: 10, right: 10, left: -20, bottom: 45 }} // 💡 Margen inferior amplio para los textos rotados
+                        >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.divider} />
-                            <XAxis dataKey="name" fontSize={12} />
-                            <YAxis fontSize={12} />
+                            {/* 💡 Rotamos los textos -45 grados y los alineamos para que quepan perfectamente en cualquier pantalla */}
+                            <XAxis 
+                                dataKey="name" 
+                                fontSize={11} 
+                                tickLine={false}
+                                angle={-45}
+                                textAnchor="end"
+                                interval={0} // 💡 Fuerza a Recharts a mostrar TODOS los municipios sin saltarse ninguno
+                                stroke={theme.palette.text.secondary}
+                            />
+                            <YAxis 
+                                fontSize={11} 
+                                tickLine={false}
+                                axisLine={false}
+                                stroke={theme.palette.text.secondary}
+                            />
                             <Tooltip cursor={{ fill: theme.palette.action.hover }} />
 
                             {/* 2. El Bar ahora toma el color directamente de la propiedad 'fill' del dato */}
-                            <Bar dataKey="cantidad" radius={[4, 4, 0, 0]} barSize={35} />
+                            <Bar dataKey="cantidad" radius={[4, 4, 0, 0]} barSize={30} />
                         </BarChart>
                     </ResponsiveContainer>
                 )}

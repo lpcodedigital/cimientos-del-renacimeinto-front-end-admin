@@ -38,6 +38,8 @@ export const DashboardPage: React.FC = () => {
 
     const stats = response?.data;
 
+    console.log(response?.data);
+
     return (
         <Box
             sx={{

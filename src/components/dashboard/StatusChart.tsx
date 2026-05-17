@@ -10,15 +10,18 @@ interface StatusChartProps {
 export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
     const [isMounted, setIsMounted] = useState(false);
 
+    console.log(data);
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
     const chartData = useMemo(() => {
-        return Object.entries(data).map(([name, value]) => {
-            const config = OBRA_STATUS_CONFIG[name] || DEFAULT_STATUS_CONFIG;
+        return Object.entries(data).map(([key, value]) => {
+            const config = OBRA_STATUS_CONFIG[key] || DEFAULT_STATUS_CONFIG;
             return {
-                name: config.label,
+                statusKey: key, // Guardamos la clave original para referencia interna
+                name: config.label || key.replace("_", " "), // Etiqueta legible para la leyenda
                 cantidad: value,
                 color: config.chartColor, // Usamos 'color' internamente
             };
@@ -41,7 +44,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
             <Box sx={{ 
                 width: "100%", 
                 flexGrow: 1, // Toma todo el espacio disponible del Card
-                minHeight: 300, // Altura mínima garantizada
+                height: 320, // Altura mínima garantizada
                 position: "relative"
             }}>
                 {isMounted && (
@@ -53,7 +56,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                                 outerRadius="80%"
                                 paddingAngle={5}
                                 dataKey="cantidad"
-                                nameKey="name"
+                                nameKey="statusKey" // Usamos la clave original para evitar problemas de renderizado
                                 cx="50%" // Centrado horizontal
                                 cy="50%" // Centrado vertical
                             >
@@ -62,6 +65,8 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                                 ))}
                             </Pie>
                             <Tooltip 
+                            // Formateador para mostrar el label legible del estatus en el Tooltip en lugar del statusKey
+                                formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
                                 contentStyle={{ 
                                     borderRadius: '8px', 
                                     border: 'none', 
@@ -74,6 +79,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                                 align="center"
                                 iconType="circle"
                                 wrapperStyle={{ paddingTop: '10px' }}
+                                formatter={(value, entry: any) => entry.payload.name}
                             />
                         </PieChart>
                     </ResponsiveContainer>
