@@ -98,7 +98,7 @@ export const dataProvider: DataProvider = {
     // Buscamos la propiedad 'files' que inyectamos en el handleOnFinish del componente
     const hasFiles = typedVariables.files && Array.isArray(typedVariables.files) && typedVariables.files.length > 0;;
 
-    if (hasFiles) {
+    if (resource === "obra" || resource === "curso" || hasFiles) {
       const formData = new FormData();
 
       // Extraemos 'files' y dejamos el resto en 'restVariables'
@@ -110,16 +110,19 @@ export const dataProvider: DataProvider = {
       });
       formData.append("request", jsonBlob);
 
-      // 3. Adjuntar los archivos reales
-      files.forEach((file: any) => {
-        // Refine/AntD/MUI suelen envolver el archivo en originFileObj
-        const actualFile = file.originFileObj || file;
-
-        // Solo adjuntamos si es realmente un objeto File o Blob
-        if (actualFile instanceof File || actualFile instanceof Blob) {
-          formData.append("files", actualFile);
-        }
-      });
+      // 3. Adjuntar los archivos si existen
+      if (hasFiles) {
+        files.forEach((file: any) => {
+          const actualFile = file.originFileObj || file;
+          if (actualFile instanceof File || actualFile instanceof Blob) {
+            formData.append("files", actualFile);
+          }
+        });
+      } else {
+        // Si no hay archivos, enviamos un Blob vacío simulando el archivo
+        // Esto evita que Spring se queje de la ausencia de la parte "files"
+        formData.append("files", new Blob([], { type: "application/octet-stream" }), "empty");
+      }
 
       // 4. Ejecutar la petición
       const { data } = await axiosInstance.post(url, formData, {
