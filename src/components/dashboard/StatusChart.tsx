@@ -66,7 +66,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                             </Pie>
                             <Tooltip 
                             // Formateador para mostrar el label legible del estatus en el Tooltip en lugar del statusKey
-                                formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+                                formatter={(value: any, _name: any, props: any) => [value, props.payload.name]}
                                 contentStyle={{ 
                                     borderRadius: '8px', 
                                     border: 'none', 
@@ -79,7 +79,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                                 align="center"
                                 iconType="circle"
                                 wrapperStyle={{ paddingTop: '10px' }}
-                                formatter={(value, entry: any) => entry.payload.name}
+                                formatter={(_value, entry: any) => entry.payload.name}
                             />
                         </PieChart>
                     </ResponsiveContainer>
