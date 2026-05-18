@@ -10,8 +10,6 @@ interface StatusChartProps {
 export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
     const [isMounted, setIsMounted] = useState(false);
 
-    console.log(data);
-
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -27,6 +25,11 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
             };
         });
     }, [data]);
+
+    // Calculamos el total general de obras en el Frontend para sacar las proporciones
+    const totalObras = useMemo(() => {
+        return chartData.reduce((sum, item) => sum + item.cantidad, 0);
+    }, [chartData]);
 
     return (
         <Card sx={{ 
@@ -44,7 +47,7 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
             <Box sx={{ 
                 width: "100%", 
                 flexGrow: 1, // Toma todo el espacio disponible del Card
-                height: 320, // Altura mínima garantizada
+                height: 380, // Altura mínima garantizada
                 position: "relative"
             }}>
                 {isMounted && (
@@ -65,8 +68,14 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                                 ))}
                             </Pie>
                             <Tooltip 
-                            // Formateador para mostrar el label legible del estatus en el Tooltip en lugar del statusKey
-                                formatter={(value: any, _name: any, props: any) => [value, props.payload.name]}
+                                // 💡 2. Formateador del Tooltip: Muestra la cantidad y el porcentaje calculado al pasar el cursor
+                                formatter={(value: any, _name: any, props: any) => {
+                                    const porcentaje = totalObras > 0 ? ((value / totalObras) * 100).toFixed(1) : 0;
+                                    return [
+                                        `${value} obras (${porcentaje}%)`, 
+                                        props.payload.name
+                                    ];
+                                }}
                                 contentStyle={{ 
                                     borderRadius: '8px', 
                                     border: 'none', 
@@ -78,8 +87,17 @@ export const StatusChart: React.FC<StatusChartProps> = ({ data }) => {
                                 verticalAlign="bottom" 
                                 align="center"
                                 iconType="circle"
-                                wrapperStyle={{ paddingTop: '10px' }}
-                                formatter={(_value, entry: any) => entry.payload.name}
+                                wrapperStyle={{ paddingTop: '15px' }}
+                                // 💡 3. Formateador de Leyenda: Añade el porcentaje al lado del nombre (Ej: "PLANEACIÓN (15.5%)")
+                                formatter={(_value, entry: any) => {
+                                    const itemData = entry.payload;
+                                    const porcentaje = totalObras > 0 ? ((itemData.cantidad / totalObras) * 100).toFixed(1) : 0;
+                                    return (
+                                        <span style={{ color: "#333", fontSize: "12px" }}>
+                                            {itemData.name} **({porcentaje}%)**
+                                        </span>
+                                    );
+                                }}
                             />
                         </PieChart>
                     </ResponsiveContainer>

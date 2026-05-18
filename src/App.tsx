@@ -59,7 +59,7 @@ function App() {
           <CssBaseline />
           <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
           <RefineSnackbarProvider>
-            <DevtoolsProvider>
+            
               <Refine
                 i18nProvider={i18nProvider}
                 accessControlProvider={accessControlProvider}
@@ -245,8 +245,7 @@ function App() {
                   }}
                 />
               </Refine>
-              <DevtoolsPanel />
-            </DevtoolsProvider>
+              
           </RefineSnackbarProvider>
         </ColorModeContextProvider>
       </RefineKbarProvider>
