@@ -38,8 +38,6 @@ export const DashboardPage: React.FC = () => {
 
     const stats = response?.data;
 
-    console.log(response?.data);
-
     return (
         <Box
             sx={{
@@ -119,10 +117,15 @@ export const DashboardPage: React.FC = () => {
                 </Grid2>
 
                 {/* --- FILA 2: GRÁFICAS --- */}
-                <Grid2 size={{ xs: 12, lg: 8 }}>
+                <Grid2 size={12}>
                     {stats?.countByMunicipality && (
                         <MunucipalityChart data={stats.countByMunicipality} />
                     )}
+                </Grid2>
+
+                {/* --- FILA 3: ANÁLISIS DE EJECUTORAS --- */}
+                <Grid2 size={{ xs: 12, lg: 8 }}>
+                    <AgencyChart data={stats?.countByAgency || {}} />
                 </Grid2>
 
                 <Grid2 size={{ xs: 12, lg: 4 }}>
@@ -131,10 +134,6 @@ export const DashboardPage: React.FC = () => {
                     )}
                 </Grid2>
 
-                {/* --- FILA 3: ANÁLISIS DE EJECUTORAS --- */}
-                <Grid2 size={12}>
-                    <AgencyChart data={stats?.countByAgency || {}} />
-                </Grid2>
             </Grid2>
         </Box>
     );
