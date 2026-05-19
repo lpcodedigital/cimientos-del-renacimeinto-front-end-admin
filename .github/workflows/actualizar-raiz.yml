@@ -3,42 +3,43 @@ name: 🤖 Actualizar Referencia en Repo Raíz
 on:
   push:
     branches:
-      - main # Se activa SOLO cuando se hace merge o push a main en este submódulo
+      - main # Se activa cuando haces merge o push a main en este submódulo
 
 jobs:
   update-root-reference:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar el repositorio Raíz (el jefe) usando el token secreto que guardamos
+      # 1. Descargar la Raíz SIN intentar clonar los submódulos internamente
       - name: Checkout del Repositorio Raíz
         uses: actions/checkout@v4
         with:
-          repository: 'lpcodedigital/SIB-CR-MONOREPO' # 👈 Verifica que este sea el nombre exacto de tu repo raíz
+          repository: 'lpcodedigital/SIB-CR-MONOREPO'
           token: ${{ secrets.REPOS_TOKEN }}
-          submodules: true
+          submodules: false # 👈 EVITA EL ERROR: No intenta resolver las URLs SSH personalizadas
           fetch-depth: 0
 
-      # 2. Configurar el Git del robot virtual para que firme el commit
+      # 2. Configurar el Git del robot virtual
       - name: Configurar Git del Bot
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      # 3. Actualizar el puntero de Frontend-Admin en la raíz al último commit
-      - name: Mover Puntero de Frontend-Admin
+      # 3. Forzar el cambio del puntero mediante el Hash SHA del commit actual
+      - name: Mover Puntero de Frontend-Admin de forma nativa
         run: |
-          git submodule update --remote Frontend-Admin
-          
-      # 4. Crear el Pull Request automático en el repositorio Raíz
+          # Actualizar el índice del submódulo usando el SHA del commit que disparó esta acción
+          git update-index --cacheinfo 160000,${{ github.sha }},Frontend-Admin
+          git commit -m "chore: auto-actualizar referencia de Frontend-Admin al commit ${{ github.sha }}" || echo "No hay cambios en el puntero"
+
+      # 4. Crear el Pull Request automático en la Raíz
       - name: Crear Pull Request en la Raíz
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.REPOS_TOKEN }}
-          commit-message: "chore: auto-actualizar referencia de Frontend-Admin"
           branch: "automation/update-frontend-admin"
           title: "🤖 Auto-Update: Puntero de Frontend-Admin"
           body: |
             Este es un Pull Request generado automáticamente por GitHub Actions.
-            Se detectaron nuevos cambios en la rama `main` del submódulo `Frontend-Admin`.
+            Se actualizó el puntero de `Frontend-Admin` al commit: ${{ github.sha }}
           base: "main"
