@@ -1,0 +1,44 @@
+name: 🤖 Actualizar Referencia en Repo Raíz
+
+on:
+  push:
+    branches:
+      - main # Se activa SOLO cuando se hace merge o push a main en este submódulo
+
+jobs:
+  update-root-reference:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el repositorio Raíz (el jefe) usando el token secreto que guardamos
+      - name: Checkout del Repositorio Raíz
+        uses: actions/checkout@v4
+        with:
+          repository: 'lpcodedigital/SIB-CR-MONOREPO' # 👈 Verifica que este sea el nombre exacto de tu repo raíz
+          token: ${{ secrets.REPOS_TOKEN }}
+          submodules: true
+          fetch-depth: 0
+
+      # 2. Configurar el Git del robot virtual para que firme el commit
+      - name: Configurar Git del Bot
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 3. Actualizar el puntero de Frontend-Admin en la raíz al último commit
+      - name: Mover Puntero de Frontend-Admin
+        run: |
+          git submodule update --remote Frontend-Admin
+          
+      # 4. Crear el Pull Request automático en el repositorio Raíz
+      - name: Crear Pull Request en la Raíz
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.REPOS_TOKEN }}
+          commit-message: "chore: auto-actualizar referencia de Frontend-Admin"
+          branch: "automation/update-frontend-admin"
+          title: "🤖 Auto-Update: Puntero de Frontend-Admin"
+          body: |
+            Este es un Pull Request generado automáticamente por GitHub Actions.
+            Se detectaron nuevos cambios en la rama `main` del submódulo `Frontend-Admin`.
+          base: "main"
