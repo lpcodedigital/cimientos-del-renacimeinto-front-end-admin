@@ -48,8 +48,13 @@ export const dataProvider: DataProvider = {
   //axiosInstance
 
   ...baseDataProvider,
-  getList: async ({ resource, pagination, meta }) => {
+  getList: async ({ resource, pagination, filters, meta }) => {
     const { currentPage: current = 1, pageSize = 10 } = pagination ?? {};
+
+    // Extraer el filtro de búsqueda que envía el formulario de Refine
+    // Refine envía los filtros en un array. Buscamos el campo "search" que definimos en el formulario de búsqueda personalizada.
+    const searchFilter = filters?.find((f) => "field" in f && f.field === "search" && f.value);
+    const searchValue = searchFilter && "value" in searchFilter ? searchFilter.value : undefined;
 
     // APLICANDO CLEAN ARCHITECTURE: Convención sobre configuración
     // 1. Prioriza el endpoint definido en el componente (vía meta).
@@ -61,7 +66,8 @@ export const dataProvider: DataProvider = {
       params: {
         page: current - 1, // Ajuste para que el backend reciba un índice basado en cero
         size: pageSize,
-        // Aquí podrías agregar lógica para convertir 'filters' y 'sorters' en parámetros de consulta si tu backend los soporta
+        // Si el valor existe, se inyecta dínamicamente como ?search=...
+        ...(searchValue ? { search: searchValue } : {}), 
       },
     });
 
