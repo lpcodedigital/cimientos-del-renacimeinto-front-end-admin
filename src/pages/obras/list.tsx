@@ -1,24 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DeleteButton, EditButton, List, ShowButton, useDataGrid } from "@refinedev/mui";
 import { Content, ObraResponseListDTO } from "../../interfaces/obra";
 import { CanAccess, HttpError, useDelete } from "@refinedev/core";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Backdrop, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Stack, Typography, TextField, InputAdornment } from "@mui/material";
 import { StatusTag } from "../../components/obras/StatusTag";
-
 import DeleteIcon from "@mui/icons-material/Delete";
+import ClearIcon from "@mui/icons-material/Clear";
+
+
 export const ObraList = () => {
 
     const [openConfirm, setOpenConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const { mutate } = useDelete()
+    const [searchText, setSearchText] = useState("");
 
     // useDataGrid es un hook que facilita la integración con componentes de tabla, como DataGrid de MUI.
     // Al usarlo, puedes obtener automáticamente los datos, la paginación, los filtros y el ordenamiento
     // sin tener que escribir lógica adicional para manejar estos aspectos.
     // El tipo aquí es content, es lo que represenra cada fila de la tabla, y HttpError es el tipo de error que puede ocurrir al hacer la solicitud.
-    const { dataGridProps } = useDataGrid<Content, HttpError>({
+    const { dataGridProps, setFilters } = useDataGrid<Content, HttpError>({
         resource: "obra", // El nombre del recurso que quieres consultar. Refine usará esto para construir la URL de la API (e.g., /obra/list).
         pagination: {
             pageSize: 10, // Número de elementos por página
@@ -26,8 +29,10 @@ export const ObraList = () => {
         meta: {
             endpoint: "list", // Si tu API tiene un endpoint específico para listar, puedes especificarlo aquí. De lo contrario, se usará el endpoint por defecto.
         },
-
     });
+
+    // Recuperamos de forma segura el total de elementos directo desde el hook de Refine
+    const totalResultados = dataGridProps.rowCount ?? 0;
 
     const columns = React.useMemo<GridColDef<Content>[]>(
         () => [
@@ -36,27 +41,32 @@ export const ObraList = () => {
                 headerName: "ID",
                 width: 70,
                 type: "number",
+                disableColumnMenu: true,
             },
             {
                 field: "name",
                 headerName: "Nombre",
                 flex: 1,
                 minWidth: 200,
+                disableColumnMenu: true,
             },
             {
                 field: "municipality",
                 headerName: "Municipio",
                 minWidth: 150,
+                disableColumnMenu: true,
             },
             {
                 field: "description",
                 headerName: "Descripción",
                 minWidth: 150,
+                disableColumnMenu: true,
             },
             {
                 field: "status",
                 headerName: "Estado",
                 minWidth: 150,
+                disableColumnMenu: true,
                 renderCell: ({ value }) => <StatusTag status={value} />,
             },
             {
@@ -64,6 +74,7 @@ export const ObraList = () => {
                 headerName: "Avance",
                 type: "number",
                 width: 100,
+                disableColumnMenu: true,
                 renderCell: ({ value }: any) => (
                     <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
                         <Box>
@@ -82,6 +93,7 @@ export const ObraList = () => {
                 field: "actions",
                 headerName: "Acciones",
                 sortable: false,
+                disableColumnMenu: true,
                 renderCell: ({ row }) => (
                     <Stack
                         direction="row"
@@ -139,6 +151,27 @@ export const ObraList = () => {
         []
     )
 
+    //EFECTO CON DEBOUNCE: Escucha los cambios de 'searchText'
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            // Aplicamos los filtros de Refine de forma automática
+            setFilters([
+                {
+                    field: "search",
+                    operator: "contains",
+                    value: searchText.trim() || undefined, // Si está vacío (o borrado), manda undefined y Refine recarga TODO
+                },
+            ]);
+        }, 400); // 400 milisegundos de espera tras la última pulsación de tecla
+
+        // Limpieza del timer si el usuario sigue escribiendo antes de los 400ms
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchText, setFilters]);
+
+    //Función para el botón 'X' (Limpia instantáneamente)
+    const handleClear = () => {
+        setSearchText(""); // Al ponerse en "", el useEffect de arriba se dispara solo y recarga todo
+    };
 
     return (
         <>
@@ -164,9 +197,49 @@ export const ObraList = () => {
             </Backdrop>
 
             <List title="Obras">
+
+                {/* Contenedor flexible para alinear buscador y contador */}
+            <Stack 
+                direction={{ xs: "column", sm: "row" }} 
+                justifyContent="space-between" 
+                alignItems={{ xs: "flex-start", sm: "center" }} 
+                spacing={2} 
+                sx={{ mb: 3 }}
+            >
+                {/* 1. Buscador */}
+                <Box sx={{ width: "100%", maxWidth: "400px" }}>
+                    <TextField
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        placeholder="Buscar por nombre, municipio o descripción..."
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        InputProps={{
+                            endAdornment: searchText && (
+                                <InputAdornment position="end">
+                                    <IconButton size="small" onClick={handleClear} edge="end">
+                                        <ClearIcon fontSize="small" />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                </Box>
+
+                {/* 2. Contador de Resultados dinámico */}
+                <Typography variant="body2" color="text.secondary" fontWeight="medium">
+                    {searchText.trim() 
+                        ? `Resultados encontrados: ${totalResultados}` 
+                        : `Total de registros: ${totalResultados}`
+                    }
+                </Typography>
+            </Stack>
+
                 <DataGrid
                     {...dataGridProps}
                     columns={columns}
+                    pageSizeOptions={[10, 25, 50]}
                     loading={dataGridProps.loading || isDeleting}
                 />
             </List>

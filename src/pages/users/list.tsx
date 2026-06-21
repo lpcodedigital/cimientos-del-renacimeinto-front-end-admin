@@ -30,12 +30,14 @@ export const UserList: React.FC = () => {
                 headerName: "ID",
                 type: "number",
                 width: 70,
+                disableColumnMenu: true,
             },
             {
                 field: "fullName",
                 headerName: "Nombre Completo",
                 flex: 1,
                 minWidth: 250,
+                disableColumnMenu: true,
                 // Concatenamos nombre y apellidos del DTO
                 valueGetter: (_, row) =>
                     `${row.name} ${row.middleName || ""} ${row.firstLastName} ${row.secondLastName}`.replace(/\s+/g, ' '),
@@ -50,12 +52,14 @@ export const UserList: React.FC = () => {
                 headerName: "Correo Electrónico",
                 flex: 1,
                 minWidth: 200,
+                disableColumnMenu: true,
                 renderCell: ({ value }) => <EmailField value={value} />,
             },
             {
                 field: "role",
                 headerName: "Rol",
                 width: 130,
+                disableColumnMenu: true,
                 // Accedemos al objeto anidado RoleDTO
                 renderCell: ({ value }) => (
                     <Chip
@@ -70,6 +74,7 @@ export const UserList: React.FC = () => {
                 field: "active",
                 headerName: "Estatus",
                 width: 100,
+                disableColumnMenu: true,
                 renderCell: ({ value }) => (
                     <TagField
                         value={value ? "Activo" : "Inactivo"}
@@ -84,6 +89,7 @@ export const UserList: React.FC = () => {
                 width: 150,
                 align: "center",
                 headerAlign: "center",
+                disableColumnMenu: true,
                 renderCell: ({ row }) => (
                     <Stack direction="row" spacing={1}>
                         <EditButton hideText size="small" recordItemId={row.idUser} />
