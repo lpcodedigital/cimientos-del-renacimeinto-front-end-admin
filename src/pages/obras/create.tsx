@@ -76,7 +76,7 @@ export const ObraCreate = () => {
                 <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                     <Grid2 container spacing={2}>
 
-                        <Grid2 size={{ xs: 12, md: 6 }}>
+                        <Grid2 size={{ xs: 12, md: 12 }}>
                             <TextField
                                 {...register("name", { required: "El nombre es obligatorio" })}
                                 error={!!errors.name}
@@ -110,6 +110,17 @@ export const ObraCreate = () => {
                                         fullWidth
                                     />
                                 )}
+                            />
+
+                        </Grid2>
+
+                        <Grid2 size={{ xs: 12, md: 6 }}>
+                            <TextField
+                                {...register("locality")}
+                                error={!!errors.locality}
+                                helperText={errors.locality?.message as string}
+                                label="Localidad"
+                                fullWidth
                             />
 
                         </Grid2>

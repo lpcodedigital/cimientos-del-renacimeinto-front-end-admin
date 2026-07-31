@@ -122,7 +122,7 @@ export const ObraEdit: React.FC = () => {
                         spacing={2}
                     >
 
-                        <Grid2 size={{ xs: 12, md: 6 }}>
+                        <Grid2 size={{ xs: 12, md: 12 }}>
                             <TextField
                                 {...register("name", { required: "El nombre es obligatorio" })}
                                 error={!!errors.name}
@@ -151,6 +151,16 @@ export const ObraEdit: React.FC = () => {
                                         />
                                     )}
                                 />
+                        </Grid2>
+
+                         <Grid2 size={{ xs: 12, md: 6 }}>
+                            <TextField
+                                {...register("locality")}
+                                error={!!errors.locality}
+                                helperText={errors.locality?.message as string}
+                                fullWidth
+                                slotProps={{ inputLabel: { shrink: true } }}
+                            />
                         </Grid2>
 
                         <Grid2 size={{ xs: 12, md: 4 }}>

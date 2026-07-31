@@ -44,6 +44,7 @@ export interface ObraResponseDTO {
     id:           number;
     name:         string;
     municipality: string;
+    locality:     string;
     agency:       string;
     investment:   number;
     progress:     number;
@@ -71,6 +72,7 @@ export interface Image {
 export interface ObraRequestDTO {
     name:         string;
     municipality: string;
+    locality:     string;
     agency:       string;
     investment:   number;
     progress:     number;
