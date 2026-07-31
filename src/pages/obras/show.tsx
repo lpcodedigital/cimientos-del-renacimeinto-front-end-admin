@@ -42,11 +42,15 @@ export const ObraShow: React.FC = () => {
                         </Box>
 
                         <Grid2 container spacing={2}>
-                            <Grid2 size={{ xs:6 }}>
+                            <Grid2 size={{ xs:4 }}>
                                 <Typography variant="overline">Municipio</Typography>
                                 <Typography variant="body1">{record?.municipality}</Typography>
                             </Grid2>
-                            <Grid2 size={{ xs:6 }}>
+                            <Grid2 size={{ xs:4 }}>
+                                <Typography variant="overline">Localidad</Typography>
+                                <Typography variant="body1">{record?.locality}</Typography>
+                            </Grid2>
+                            <Grid2 size={{ xs:4 }}>
                                 <Typography variant="overline">Estado</Typography>
                                 <Box>
                                     <StatusTag status={record?.status || ""}/>
