@@ -1,17 +1,19 @@
 import React from "react";
 import { Show, DateField } from "@refinedev/mui";
 import { useShow } from "@refinedev/core";
-import { 
-    Typography, Stack, Box, Grid2, Paper, Divider, 
-    ImageList, ImageListItem, Chip 
+import {
+    Typography, Stack, Box, Grid2, Paper, Divider,
+    ImageList, ImageListItem, Chip,
+    Skeleton
 } from "@mui/material";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { CursoResponseDTO } from "../../interfaces/curso/curso";
+import { MapPicker } from "../../components/obras/MapPicker";
 
 export const CursoShow = () => {
     const { query } = useShow<CursoResponseDTO>({
-        
+
         meta: {
             endpoint: "detail", // Coincide con tu @GetMapping("/show/{id}")
         }
@@ -23,7 +25,7 @@ export const CursoShow = () => {
     return (
         <Show isLoading={isLoading} title={`Detalles del Curso: ${record?.title || ""}`}>
             <Grid2 container spacing={4}>
-                
+
                 {/* COLUMNA IZQUIERDA: Información y Descripción */}
                 <Grid2 size={{ xs: 12, md: 7 }}>
                     <Stack spacing={3}>
@@ -32,21 +34,41 @@ export const CursoShow = () => {
                                 {record?.title}
                             </Typography>
                             <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                                <Chip 
-                                    icon={<LocationOnIcon />} 
-                                    label={record?.municipalityName} 
-                                    variant="outlined" 
+                                <Chip
+                                    icon={<LocationOnIcon />}
+                                    label={record?.municipalityName}
+                                    variant="outlined"
                                     color="secondary"
                                 />
-                                <Chip 
-                                    icon={<CalendarMonthIcon />} 
-                                    label={<DateField value={record?.courseDate} format="DD/MM/YYYY" />} 
+                                <Chip
+                                    icon={<CalendarMonthIcon />}
+                                    label={<DateField value={record?.courseDate} format="DD/MM/YYYY" />}
                                     variant="outlined"
                                 />
                             </Stack>
                         </Box>
 
                         <Divider />
+
+                        <Grid2
+                            size={{
+                                xs: 12,
+                            }}
+                        >
+                            <Typography>
+                                Ubicación geográfica del curso
+                            </Typography>
+
+                            {/* Esta validación es para que no se muestre el mapa hasta que la obra tenga coordenadas */}
+                            {record ? (
+                                <MapPicker
+                                    lat={record?.latitude}
+                                    lng={record?.longitude}
+                                />
+                            ) : (
+                                <Skeleton variant="rectangular" height={400} />
+                            )}
+                        </Grid2>
 
                         <Box>
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -76,13 +98,13 @@ export const CursoShow = () => {
                     <Typography variant="h6" gutterBottom fontWeight="bold">
                         Portada
                     </Typography>
-                    <Box 
+                    <Box
                         component="img"
                         src={record?.coverImage?.url || "/default-course.png"}
-                        sx={{ 
-                            width: "100%", 
-                            maxHeight: 300, 
-                            objectFit: "cover", 
+                        sx={{
+                            width: "100%",
+                            maxHeight: 300,
+                            objectFit: "cover",
                             borderRadius: 2,
                             boxShadow: 3,
                             mb: 4

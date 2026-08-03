@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Edit, useAutocomplete } from "@refinedev/mui";
 import { Box, TextField, Autocomplete, Grid2, Typography, Button, Paper, Stack, Backdrop, CircularProgress, IconButton } from "@mui/material";
 import { useForm } from "@refinedev/react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { CursoRequestDTO, CursoResponseDTO } from "../../interfaces/curso/curso";
 import { ImagePreviewGrid } from "../../components/obras/ImagePreviewGrid";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from "@mui/icons-material/Delete";
+import { MapPicker } from "../../components/obras/MapPicker";
+import geoData from "../../assets/data/yucatan_municipios_2023.json";
 
 export const CursoEdit = () => {
     // 1. Añadimos estado para validar la portada
@@ -29,11 +31,25 @@ export const CursoEdit = () => {
 
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB en bytes
 
+    // Estado para el buscador del mapa 
+    const [municipioABuscar, setMunicipioABuscar] = useState<string | null>(null);
+
+    // Función auxiliar para comparar textos ignorando acentos y mayúsculas/minúsculas
+    const normalizeText = (text: string) => {
+        if (!text) return "";
+        return text
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+    };
+
     const {
         saveButtonProps,
         register,
         control,
         formState: { errors },
+        setValue,
         handleSubmit,
         refineCore: { onFinish, query, formLoading },
     } = useForm<CursoResponseDTO, any, CursoRequestDTO>({
@@ -52,6 +68,11 @@ export const CursoEdit = () => {
     // Cargamos los datos iniciales del curso
     const cursoData = query?.data?.data;
 
+    const { autocompleteProps } = useAutocomplete({
+        resource: "municipio",
+        meta: { endpoint: "list" },
+    });
+
     useEffect(() => {
         if (cursoData) {
             setExistingImages(cursoData.images || []);
@@ -59,6 +80,26 @@ export const CursoEdit = () => {
             setOriginalCoverId(cursoData.coverImage?.id || null);
         }
     }, [cursoData]);
+
+    // 💡 NUEVO: Sincronizar el municipio de la base de datos con el buscador del mapa
+    useEffect(() => {
+        if (cursoData?.municipalityId && autocompleteProps.options.length > 0) {
+            // Buscamos el objeto del municipio usando el ID que vino de la BD
+            const municipioGuardado = autocompleteProps.options.find(
+                (opt: any) => opt.id === cursoData.municipalityId
+            );
+
+            // Si lo encuentra y el buscador está vacío, lo asignamos para que el mapa haga focus
+            if (municipioGuardado && !municipioABuscar) {
+                setMunicipioABuscar(municipioGuardado.name);
+            }
+        }
+    }, [cursoData, autocompleteProps.options]); // Se ejecuta cuando cargan los datos del curso o las opciones
+
+    const municipiosOptions = geoData.features.map(f => f.properties?.NOMGEO).sort();
+
+    const lat = useWatch({ control, name: "latitude" });
+    const lng = useWatch({ control, name: "longitude" });
 
     const handleCustomSubmit = (values: any) => {
         // VALIDACIÓN: ¿Hay alguna portada disponible? (Nueva o Existente)
@@ -101,10 +142,6 @@ export const CursoEdit = () => {
         });
     };
 
-    const { autocompleteProps } = useAutocomplete({
-        resource: "municipio",
-        meta: { endpoint: "list" },
-    });
 
     return (
         <>
@@ -138,36 +175,145 @@ export const CursoEdit = () => {
                                 control={control}
                                 name="municipalityId"
                                 rules={{ required: "El municipio es obligatorio" }}
+                                render={({ field }) => {
+                                    // Buscamos el objeto completo para que el Select muestre el texto
+                                    const selectedOption = autocompleteProps.options?.find(
+                                        (item: any) => item.id === field.value
+                                    ) || null;
+
+                                    return (
+                                        <Autocomplete
+                                            {...autocompleteProps}
+                                            value={selectedOption}
+                                            open={false} // Bloquea el menú desplegable
+                                            forcePopupIcon={false} // Oculta la flecha
+                                            readOnly // Deshabilita la interacción
+                                            onChange={(_, newValue: any) => {
+                                                field.onChange(newValue?.id || null);
+                                            }}
+                                            getOptionLabel={(item) => (typeof item === "object" ? item.name : "")}
+                                            isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Municipio (Detectado por Mapa)"
+                                                    variant="filled"
+                                                    slotProps={{
+                                                        input: {
+                                                            ...params.InputProps,
+                                                            readOnly: true,
+                                                        },
+                                                        inputLabel: { shrink: true }
+                                                    }}
+                                                    error={!!errors.municipalityId}
+                                                    helperText={errors.municipalityId ? (errors.municipalityId.message as string) : "Selecciona la ubicación en el mapa."}
+                                                />
+                                            )}
+                                        />
+                                    );
+                                }}
+                            />
+                            <TextField {...register("courseDate")} type="date" label="Fecha" fullWidth sx={{ mt: 2 }} InputLabelProps={{ shrink: true }} />
+                        </Grid2>
+
+                        <Grid2 size={{ xs: 6 }}>
+                            <Controller
+                                control={control}
+                                name="latitude"
                                 render={({ field }) => (
-                                    <Autocomplete
-                                        {...autocompleteProps}
+                                    <TextField
                                         {...field}
-                                        // Comparamos la opción con el ID actual del formulario
-                                        onChange={(_, value) => field.onChange(value?.id)}
-                                        // Buscamos el objeto correspondiente al ID para mostrar el nombre
-                                        value={
-                                            autocompleteProps.options?.find(
-                                                (item) => item.id === field.value
-                                            ) || null
-                                        }
-                                        isOptionEqualToValue={(option, value) =>
-                                            value === undefined ||
-                                            value === null ||
-                                            option.id === (value.id ?? value)
-                                        }
-                                        getOptionLabel={(item) => (typeof item === "object" ? item.name : "")}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Municipio"
-                                                error={!!errors.municipalityId}
-                                                helperText={errors.municipalityId?.message as string}
-                                            />
-                                        )}
+                                        label="Latitud"
+                                        fullWidth
+                                        variant="filled"
+                                        slotProps={{
+                                            input: { readOnly: true },
+                                            inputLabel: { shrink: true }
+                                        }}
+                                        helperText={errors.latitude ? (errors.latitude.message as string) : "Selecciona la ubicación en el mapa para detectar la latitud automáticamente."}
                                     />
                                 )}
                             />
-                            <TextField {...register("courseDate")} type="date" label="Fecha" fullWidth sx={{ mt: 2 }} InputLabelProps={{ shrink: true }} />
+                        </Grid2>
+
+                        <Grid2 size={{ xs: 6 }}>
+                            <Controller
+                                control={control}
+                                name="longitude"
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        label="Longitud"
+                                        fullWidth
+                                        variant="filled"
+                                        slotProps={{
+                                            input: { readOnly: true },
+                                            inputLabel: { shrink: true }
+                                        }}
+                                        helperText={errors.longitude ? (errors.longitude.message as string) : "Selecciona la ubicación en el mapa para detectar la longitud automáticamente."}
+                                    />
+                                )}
+                            />
+                        </Grid2>
+
+                        {/* Mapa reactivo */}
+                        <Grid2
+                            size={{
+                                xs: 12,
+                            }}
+                        >
+                            <Typography>
+                                Ubicación geográfica del curso
+                            </Typography>
+
+                            <Stack spacing={2}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="subtitle2">📍 Ubicador de Municipio</Typography>
+                                    {municipioABuscar && (
+                                        <Button
+                                            size="small"
+                                            onClick={() => setMunicipioABuscar(null)}
+                                            sx={{ textTransform: 'none', color: '#901b45' }}
+                                        >
+                                            Limpiar búsqueda
+                                        </Button>
+                                    )}
+                                </Box>
+
+                                {/* Buscador de apoyo para el mapa */}
+                                <Autocomplete
+                                    options={municipiosOptions}
+                                    value={municipioABuscar}
+                                    onChange={(_, newValue) => setMunicipioABuscar(newValue)}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Buscar para acercar..." size="small" />
+                                    )}
+                                />
+                                <MapPicker
+                                    lat={lat}
+                                    lng={lng}
+                                    targetMunicipio={municipioABuscar}
+                                    onChange={(newLat, newLng) => {
+                                        // Actualizamos las coordenadas
+                                        setValue("latitude", newLat, { shouldValidate: true });
+                                        setValue("longitude", newLng, { shouldValidate: true });
+                                    }}
+                                    onMunicipioDetectado={(nameFromMap) => {
+                                        // 1. Obtenemos las opciones del backend (las que alimentan el select bloqueado)
+                                        const opcionesBackend = autocompleteProps.options || [];
+
+                                        // 2. Buscamos el municipio ignorando acentos y mayúsculas
+                                        const municipioEncontrado = opcionesBackend.find((opt: any) =>
+                                            normalizeText(opt.name) === normalizeText(nameFromMap)
+                                        );
+
+                                        if (municipioEncontrado) {
+                                            // 3. AQUÍ ESTÁ LA MAGIA: Guardamos el ID en 'municipalityId' (Adiós error de TS)
+                                            setValue("municipalityId", municipioEncontrado.id, { shouldValidate: true });
+                                        }
+                                    }}
+                                />
+                            </Stack>
                         </Grid2>
 
                         {/* SECCIÓN PORTADA */}

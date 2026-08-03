@@ -12,6 +12,8 @@ export interface CursoResponseDTO {
     title: string;
     description: string;
     courseDate: string;
+    latitude: number;
+    longitude: number;
     municipalityName: string;
     municipalityId: number;
     coverImage: CursoImage | null;
@@ -33,6 +35,8 @@ export interface CursoRequestDTO {
     description: string;
     municipalityId: number;
     courseDate: string;
+    latitude: number;
+    longitude: number;
     keepImageIds?: number[];
     currentCoverImageId?: number | null;
     files?: any[]; // Para el manejo de Multipart
