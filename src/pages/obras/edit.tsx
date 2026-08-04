@@ -221,8 +221,8 @@ export const ObraEdit: React.FC = () => {
                                             <TextField
                                                 {...field}
                                                 label="Latitud"
-                                                fullWidth
                                                 variant="filled"
+                                                fullWidth
                                                 slotProps={{
                                                     input: { readOnly: true },
                                                     inputLabel: { shrink: true }
@@ -241,8 +241,8 @@ export const ObraEdit: React.FC = () => {
                                             <TextField
                                                 {...field}
                                                 label="Longitud"
-                                                fullWidth
                                                 variant="filled"
+                                                fullWidth
                                                 slotProps={{
                                                     input: { readOnly: true },
                                                     inputLabel: { shrink: true }

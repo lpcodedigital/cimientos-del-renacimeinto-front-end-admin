@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Create, useAutocomplete } from "@refinedev/mui";
 import { Box, TextField, Autocomplete, Grid2, Typography, Button, Paper, Stack, Backdrop, CircularProgress } from "@mui/material";
 import { useForm } from "@refinedev/react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { CursoRequestDTO } from "../../interfaces/curso/curso";
 import { ImagePreviewGrid } from "../../components/obras/ImagePreviewGrid";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import geoData from "../../assets/data/yucatan_municipios_2023.json";
+import { MapPicker } from "../../components/obras/MapPicker";
 
 export const CursoCreate = () => {
     const [coverError, setCoverError] = useState(false);
@@ -19,6 +21,7 @@ export const CursoCreate = () => {
     const {
         saveButtonProps,
         register,
+        setValue,
         control,
         formState: { errors },
         handleSubmit, // Este es el de react-hook-form
@@ -30,6 +33,16 @@ export const CursoCreate = () => {
             redirect: "list",
         },
     });
+
+    // Función auxiliar para comparar textos ignorando acentos y mayúsculas/minúsculas
+    const normalizeText = (text: string) => {
+        if (!text) return "";
+        return text
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Quita acentos
+            .toLowerCase()
+            .trim();
+    };
 
     // Función para procesar y enviar
     const handleCustomSubmit = (values: any) => {
@@ -57,6 +70,15 @@ export const CursoCreate = () => {
         resource: "municipio",
         meta: { endpoint: "list" },
     });
+
+    const municipiosOptions = geoData.features.map(f => f.properties?.NOMGEO).sort();
+
+    // Escuchamos los valores de lat/lng para pasarselos al mapa
+    const lng = useWatch({ control, name: "longitude" });
+    const lat = useWatch({ control, name: "latitude" });
+
+    // Estado para el buscador de municipios en el mapa
+    const [municipioBusqueda, setMunicipioBusqueda] = useState<string | null>(null);
 
     return (
         <>
@@ -120,23 +142,44 @@ export const CursoCreate = () => {
                                     control={control}
                                     name="municipalityId"
                                     rules={{ required: "El municipio es obligatorio" }}
-                                    render={({ field }) => (
-                                        <Autocomplete
-                                            {...autocompleteProps}
-                                            {...field}
-                                            onChange={(_, value) => field.onChange(value?.id)}
-                                            getOptionLabel={(item) => (typeof item === 'object' ? item.name : "")}
-                                            isOptionEqualToValue={(option, value) => option.id === value}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Municipio"
-                                                    error={!!errors.municipalityId}
-                                                    helperText={errors.municipalityId?.message as string}
-                                                />
-                                            )}
-                                        />
-                                    )}
+                                    render={({ field }) => {
+
+                                        // 💡 CLAVE: Buscamos el objeto completo basado en el ID que tiene react-hook-form
+                                        const selectedOption = autocompleteProps.options.find(
+                                            (opt: any) => opt.id === field.value
+                                        ) || null;
+
+                                        return (
+                                            <Autocomplete
+                                                {...autocompleteProps} // Pasa las opciones, loading, etc.
+                                                value={selectedOption} // Le pasamos el objeto completo
+                                                open={false} // Evitamos que se abra el dropdown, ya que solo queremos selección manual
+                                                forcePopupIcon={false} // Oculta el ícono de dropdown
+                                                readOnly // Evita que el usuario escriba, solo puede seleccionar del mapa
+                                                onInputChange={(_, newInputValue) => {
+                                                    // Si el usuario borra el input, limpiamos el ID en el formulario
+                                                    if (newInputValue === "") {
+                                                        field.onChange(null);
+                                                    }
+                                                }}
+                                                onChange={(_, newValue: any) => {
+                                                    // Cuando el usuario elige manualmente, guardamos el ID
+                                                    field.onChange(newValue?.id || null);
+                                                }}
+                                                getOptionLabel={(item) => item?.name || ""}
+                                                isOptionEqualToValue={(option, value) => option.id === value?.id}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Municipio"
+                                                        variant="filled"
+                                                        error={!!errors.municipalityId}
+                                                        helperText={errors.municipalityId?.message as string}
+                                                    />
+                                                )}
+                                            />
+                                        );
+                                    }}
                                 />
                                 <TextField
                                     {...register("courseDate", { required: "La fecha es obligatoria" })}
@@ -144,8 +187,126 @@ export const CursoCreate = () => {
                                     label="Fecha"
                                     InputLabelProps={{ shrink: true }}
                                     fullWidth
+                                    error={!!errors.courseDate}
+                                    helperText={errors.courseDate?.message as string}
                                 />
                             </Stack>
+                        </Grid2>
+
+                        <Grid2 size={{ xs: 6 }}>
+                            <Controller
+                                control={control}
+                                name="latitude"
+                                rules={{ required: "La latitud es obligatoria" }}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        label="Latitud"
+                                        variant="filled"
+                                        fullWidth
+                                        slotProps={{
+                                            input: {
+                                                readOnly: true, // No editable
+                                            },
+                                            inputLabel: {
+                                                shrink: true, // Mantiene el label arriba siempre
+                                            }
+                                        }}
+                                        helperText={errors.latitude ? (errors.latitude.message as string) : "Selecciona la ubicación en el mapa para detectar la latitud automáticamente."}
+                                    />
+                                )}
+                            />
+                        </Grid2>
+
+                        <Grid2 size={{ xs: 6 }}>
+                            <Controller
+                                control={control}
+                                name="longitude"
+                                rules={{ required: "La longitud es obligatoria" }}
+                                render={({ field }) => (
+
+                                    <TextField
+                                        {...field}
+                                        label="Longitud"
+                                        variant="filled"
+                                        fullWidth
+                                        slotProps={{
+                                            input: {
+                                                readOnly: true, // No editable
+                                            },
+                                            inputLabel: {
+                                                shrink: true, // Mantiene el label arriba siempre
+                                            }
+                                        }}
+                                        helperText={errors.longitude ? (errors.longitude.message as string) : "Selecciona la ubicación en el mapa para detectar la longitud automáticamente."}
+                                    />
+                                )}
+                            />
+                        </Grid2>
+
+                        <Grid2
+                            size={{
+                                xs: 12,
+                            }}
+                        >
+                            <Typography>
+                                Ubicación geográfica del curso
+                            </Typography>
+
+                            <Stack spacing={2}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="subtitle2">📍 Ubicador de Municipio</Typography>
+                                    {municipioBusqueda && (
+                                        <Button
+                                            size="small"
+                                            onClick={() => setMunicipioBusqueda(null)}
+                                            sx={{ textTransform: 'none' }}
+                                        >
+                                            Limpiar filtro
+                                        </Button>
+                                    )}
+                                </Box>
+
+                                <Autocomplete
+                                    options={municipiosOptions}
+                                    value={municipioBusqueda}
+                                    onChange={(_, newValue) => setMunicipioBusqueda(newValue)}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Escribe para buscar..." size="small" />
+                                    )}
+                                />
+                                <MapPicker
+                                    lat={lat}
+                                    lng={lng}
+                                    targetMunicipio={municipioBusqueda}
+                                    onChange={(newLat, newLng) => {
+                                        // Actualizamos los campos del fomrmulario automáticamente
+                                        setValue("latitude", newLat, { shouldValidate: true })
+                                        setValue("longitude", newLng, { shouldValidate: true })
+                                    }}
+                                    onMunicipioDetectado={(nameFromMap) => {
+                                        // 1. Obtenemos las opciones que cargó el backend
+                                        const opcionesBackend = autocompleteProps.options || [];
+
+                                        // 2. Comparamos el nombre del mapa con las opciones del backend
+                                        const municipioEncontrado = opcionesBackend.find((opt: any) =>
+                                            normalizeText(opt.name) === normalizeText(nameFromMap)
+                                        );
+
+                                        if (municipioEncontrado) {
+                                            // 3. Si lo encuentra, guardamos el ID en el formulario
+                                            setValue("municipalityId", municipioEncontrado.id, { shouldValidate: true });
+
+                                            // Opcional: si también tienes un campo "municipality" string, lo puedes guardar
+                                            // setValue("municipality", municipioEncontrado.name);
+                                        } else {
+                                            console.warn(`El municipio "${nameFromMap}" detectado en el mapa no coincide con ninguno en la base de datos.`);
+                                            // Aquí podrías usar un toast/snackbar de MUI para avisarle al usuario
+                                        }
+                                    }}
+                                />
+                            </Stack>
+
                         </Grid2>
 
                         {/* SECCIÓN PORTADA */}

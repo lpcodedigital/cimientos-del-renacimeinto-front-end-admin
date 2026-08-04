@@ -185,6 +185,7 @@ export const ObraCreate = () => {
                                     <TextField
                                         {...field}
                                         label="Latitud"
+                                        variant="filled"
                                         fullWidth
                                         slotProps={{
                                             input: {
@@ -210,6 +211,7 @@ export const ObraCreate = () => {
                                     <TextField
                                         {...field}
                                         label="Longitud"
+                                        variant="filled"
                                         fullWidth
                                         slotProps={{
                                             input: {
